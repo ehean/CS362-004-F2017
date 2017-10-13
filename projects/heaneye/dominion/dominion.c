@@ -399,17 +399,14 @@ int isGameOver(struct gameState *state) {
 
   //if three supply pile are at 0, the game ends
   j = 0;
-  for (i = 0; i < 25; i++)
-    {
-      if (state->supplyCount[i] == 0)
-	{
-	  j++;
-	}
-    }
-  if ( j >= 3)
-    {
+  for (i = 0; i < 25; i++) {
+      if (state->supplyCount[i] == 0) {
+	        j++;
+	    }
+  }
+  if ( j >= 3) {
       return 1;
-    }
+  }
 
   return 0;
 }
@@ -665,7 +662,7 @@ int playAdventurer(int drawntreasure, struct gameState *state, int currentPlayer
   }
   /************* BUG INSERTED ****************
    * Original code: 	while (z-1>=0) {
-	 Bug code:			while (z-->=0) {
+	 * Bug code:			while (z-->=0) {
   ********************************************/
   while(z-->=0){
     state->discard[currentPlayer][state->discardCount[currentPlayer]++]=temphand[z-1]; // discard all cards in play that have been drawn
@@ -676,6 +673,8 @@ int playAdventurer(int drawntreasure, struct gameState *state, int currentPlayer
 
 int playSmithy(int currentPlayer, struct gameState *state, int handPos)
 {
+  printf("%d\n", currentPlayer);
+  printf("%d\n\n", state->handCount[currentPlayer]);
   int i;
   /************* BUG INSERTED ****************
    * Original code: 	for (i = 0; i < 3; i++)
@@ -688,6 +687,7 @@ int playSmithy(int currentPlayer, struct gameState *state, int handPos)
 		
   //discard card from hand
   discardCard(handPos, currentPlayer, state, 0);
+  printf("%d\n\n", state->handCount[currentPlayer]);
   return 0;
 }
 
