@@ -86,23 +86,12 @@ int main() {
           failCount++;
      }
 
-     //   printf("\tplayer 0 hand+discard+deck count = %d, expected = %d\n", testGame.handCount[thisPlayer] + testGame.deckCount[thisPlayer] + testGame.handCount[thisPlayer], tmpTotalCardCount);
-     // if (testGame.handCount[thisPlayer] + testGame.deckCount[thisPlayer] + testGame.handCount[thisPlayer] == tmpTotalCardCount) {
-     //      printf("\tPASS\n\n");
-     //      passCount++;
-     // }
-     // else {
-     //      printf("\tFAIL\n\n");
-     //      failCount++;
-     // }
-
+     
      tmpTotalCardCount = testGame.handCount[thisPlayer] + testGame.deckCount[thisPlayer] + testGame.handCount[thisPlayer];
 
      endTurn(&testGame);
      endTurn(&testGame);
 
-
-     // cardEffect(adventurer, choice1, choice2, choice3, &testGame, handpos, &bonus);
 
      printf("TEST 3:\n\tHand Count, post-effect\n");
 
@@ -127,81 +116,6 @@ int main() {
      }
 
      
-     //endTurn(&testGame);
-     //endTurn(&testGame);
-
-//      cardEffect(adventurer, choice1, choice2, choice3, &testGame, handpos, &bonus);
-
-//      printf("TEST 4:\n\tHand Count, post-effect\n");
-
-//      printf("\tplayer 0 hand count = %d, expected = %d\n", testGame.handCount[thisPlayer], controlGame.handCount[thisPlayer]+6);
-//      if (testGame.handCount[thisPlayer] == controlGame.handCount[thisPlayer]+6) {
-//           printf("\tPASS\n\n");
-//           passCount++;
-//      }
-//      else {
-//           printf("\tFAIL\n\n");
-//           failCount++;
-//      }
-
-//        printf("\tplayer 0 discard count = %d, expected = %d\n", testGame.discardCount[thisPlayer], controlGame.discardCount[thisPlayer]);
-//      if (testGame.discardCount[thisPlayer] == controlGame.discardCount[thisPlayer]) {
-//           printf("\tPASS\n\n");
-//           passCount++;
-//      }
-//      else {
-//           printf("\tFAIL\n\n");
-//           failCount++;
-//      }
-
-//      cardEffect(adventurer, choice1, choice2, choice3, &testGame, handpos, &bonus);
-
-//      printf("TEST 5:\n\tHand Count, post-effect\n");
-
-//      printf("\tplayer 0 hand count = %d, expected = %d\n", testGame.handCount[thisPlayer], controlGame.handCount[thisPlayer]+8);
-//      if (testGame.handCount[thisPlayer] == controlGame.handCount[thisPlayer]+8) {
-//           printf("\tPASS\n\n");
-//           passCount++;
-//      }
-//      else {
-//           printf("\tFAIL\n\n");
-//           failCount++;
-//      }
-
-//   printf("\tplayer 0 discard count = %d, expected = %d\n", testGame.discardCount[thisPlayer], controlGame.discardCount[thisPlayer]);
-//      if (testGame.discardCount[thisPlayer] == controlGame.discardCount[thisPlayer]) {
-//           printf("\tPASS\n\n");
-//           passCount++;
-//      }
-//      else {
-//           printf("\tFAIL\n\n");
-//           failCount++;
-//      }
-
-//           cardEffect(adventurer, choice1, choice2, choice3, &testGame, handpos, &bonus);
-
-//      printf("TEST 6:\n\tHand Count, post-effect\n");
-
-//      printf("\tplayer 0 hand count = %d, expected = %d\n", testGame.handCount[thisPlayer], controlGame.handCount[thisPlayer]+10);
-//      if (testGame.handCount[thisPlayer] == controlGame.handCount[thisPlayer]+10) {
-//           printf("\tPASS\n\n");
-//           passCount++;
-//      }
-//      else {
-//           printf("\tFAIL\n\n");
-//           failCount++;
-//      }
-
-
-//   printf("\tplayer 0 discard count = %d, expected = %d\n", testGame.discardCount[thisPlayer], controlGame.discardCount[thisPlayer]);
-//      if (testGame.discardCount[thisPlayer] == controlGame.discardCount[thisPlayer]) {
-//           printf("\tPASS\n\n");
-//           passCount++;
-//      }
-//      else {
-//           printf("\tFAIL\n\n");
-//           failCount++;
-//      }
 
      printf("ADVENTURER PASS COUNT:\t%d\n", passCount);
      printf("ADVENTURER FAIL COUNT:\t%d\n", failCount);

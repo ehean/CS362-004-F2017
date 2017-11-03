@@ -1,0 +1,9 @@
+Exception: STATUS_INTEGER_DIVIDE_BY_ZERO at eip=004015E3
+eax=315831DC ebx=315831DC ecx=00000000 edx=00000000 esi=612F710E edi=611D9DAE
+ebp=0062CC78 esp=00626520 program=C:\users\erik\Documents\personal\school\osu\courses\5_fall_2017\CS_362_SEII\CS362-004-F2017\projects\heaneye\dominion\randomtestadventurer.exe, pid 5060, thread main
+cs=0023 ds=002B es=002B fs=0053 gs=002B ss=002B
+Stack trace:
+Frame     Function  Args
+0062CC78  004015E3 (00000001, 0062CC9C, 20010108, 61007A6A)
+0062CD18  61007ACF (00000000, 0062CD74, 61006B00, 00000000)
+End of stack trace
