@@ -111,6 +111,36 @@ public class UrlValidatorTest extends TestCase {
 	   System.out.println(urlVal.isValid("http://www.amazon.com:-1"));
 	   System.out.println(urlVal.isValid("http://www.amazon.com;0"));
 	   System.out.println(urlVal.isValid("http://www.amazon.com:09348248"));
+	   
+	   /*Test Paths*/
+	   //void path
+	   assertTrue("An otherwise valid URL with a void path should be valid.", urlVal.isValid("http://www.google.com:80"));
+	   //single valid xpalphas paths
+	   assertTrue("An otherwise valid URL with a single '+' path should be valid.", urlVal.isValid("http://www.google.com:80/+"));
+	   assertTrue("An otherwise valid URL with a single alpha 'a' path should be valid.", urlVal.isValid("http://www.google.com:80/a"));
+	   assertTrue("An otherwise valid URL with a single digit '0' path should be valid.", urlVal.isValid("http://www.google.com:80/0"));
+	   assertTrue("An otherwise valid URL with a single safe '$' path should be valid.", urlVal.isValid("http://www.google.com:80/$"));
+	   assertTrue("An otherwise valid URL with a single extra '!' path should be valid.", urlVal.isValid("http://www.google.com:80/!"));
+	   assertTrue("An otherwise valid URL with a single escape '%aa' path should be valid.", urlVal.isValid("http://www.google.com:80/%aa"));
+	   //multiple xpalphas path delimited by forward slashes
+	   assertTrue("An otherwise valid URL with xpalphas/xpalphas/ path should be valid.", urlVal.isValid("http://www.google.com:80/+a0$!%aa/+a0$!%aa/+a0$!%aa/"));
+	   //single invalid char paths
+	   assertFalse("An otherwise valid URL with a single reserved character '?' path should be invalid.", urlVal.isValid("http://www.google.com:80/?"));
+	   assertFalse("An otherwise valid URL with a single national character '{' path should be invalid.", urlVal.isValid("http://www.google.com:80/{"));
+	   assertFalse("An otherwise valid URL with a single punctuation character '<' path should be invalid.", urlVal.isValid("http://www.google.com:80/<"));
+	   //multiple invalid character paths delimited by forward slashes
+	   assertFalse("An otherwise valid URL with /invalidChars/invalidChars/ path should be invalid.", urlVal.isValid("http://www.google.com:80/?{</?{</?{</?{</"));
+	   //one valid character and one invalid character
+	   assertFalse("An otherwise valid URL with invalidChar+xpalphas path should be invalid.", urlVal.isValid("http://www.google.com:80/{a"));
+	   //mixing of invalid characters and invalid character paths delimited by forward slashes
+	   assertFalse("An otherwise valid URL with /invalidChars+validChars/invalidChars+validChars/ path should be invalid.", urlVal.isValid("http://www.google.com:80/+a0$!%aa?{</+a0$!%aa?{</"));
+	   /*Test Queries*/
+	   //void query
+	   assertTrue("An otherwise valid URL with a void query should be valid.", urlVal.isValid("http://www.google.com:80/"));
+	   //? query
+	   assertTrue("An otherwise valid URL with a query beginning with '?' to the end of the URL with no '#' should be valid.", urlVal.isValid("http://www.google.com:80/?a1+}{!@$%&^*"));
+	   //?##
+	   assertFalse("An otherwise valid URL with a query ending in'##' should be invalid as '#' starts a fragment and '#' is not a valid fragment.", urlVal.isValid("http://www.google.com:80/?##"));
    }
    
    
