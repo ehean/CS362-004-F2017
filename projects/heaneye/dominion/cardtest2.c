@@ -1,210 +1,83 @@
-/*
- * cardtest2.c
- *
- * To compile: make cardtest2
- */
-
-
+/*-James Todd
+ *-toddjam
+ *-CS_362_400
+ *-Assignment 3
+ *-cardtest2.c
+ *- Unit test for council room card
+ *-10/22/17*/
 
 #include "dominion.h"
 #include "dominion_helpers.h"
 #include <string.h>
 #include <stdio.h>
-#include <assert.h>
 #include "rngs.h"
 #include <stdlib.h>
 
-#define TESTCARD "adventurer"
+//Game rules from http://riograndegames.com/uploads/Game/Game_278_gameRules.pdf
 
-int main() {
+//int acting as a boolean to determine if all tests have passed at the end of test code
+int allTestsPassed = 1;
 
-     int numPlayers = 2; 
-     int kingdomCards[10] = {adventurer, embargo, village, minion, mine, cutpurse, sea_hag, tribute, smithy, council_room};
-     int randomSeed = 1000;
-     struct gameState controlGame, testGame;
-     int thisPlayer = 0;
-     int handpos = 0, choice1 = 0, choice2 = 0, choice3 = 0, bonus = 0;
-     int passCount = 0;
-     int failCount = 0;
-
-     // initialie control game state
-     initializeGame(numPlayers, kingdomCards, randomSeed, &controlGame);
-
-     memcpy(&testGame, &controlGame, sizeof(struct gameState));
-
-     printf("TEST 1:\n\tHand Count, pre-effect\n");
-
-     printf("\tplayer 0 hand count = %d, expected = %d\n", testGame.handCount[thisPlayer], controlGame.handCount[thisPlayer]);
-     if (testGame.handCount[thisPlayer] == controlGame.handCount[thisPlayer]) {
-          printf("\tPASS\n\n");
-          passCount++;
-     }
-     else {
-          printf("\tFAIL\n\n");
-          failCount++;
-     }
-
-     printf("\tplayer 0 discard+deck count = %d, expected = %d\n", testGame.discardCount[thisPlayer]+testGame.deckCount[thisPlayer], controlGame.discardCount[thisPlayer]+controlGame.deckCount[thisPlayer]);
-     if (testGame.discardCount[thisPlayer]+testGame.deckCount[thisPlayer] == controlGame.discardCount[thisPlayer]+controlGame.deckCount[thisPlayer]) {
-          printf("\tPASS\n\n");
-          passCount++;
-     }
-     else {
-          printf("\tFAIL\n\n");
-          failCount++;
-     }
-
-     // add 30 copper to current player's deck
-
-     testGame.coins = 200;
-     testGame.numBuys = 40;
-     int i;
-     for (i = 0; i < 20; i++) {
-          buyCard(adventurer, &testGame);
-     }
-     for (i = 0; i < 20; i++) {
-          buyCard(copper, &testGame);
-     }
-
-     
-     endTurn(&testGame);
-     endTurn(&testGame);
-     int tmpTotalCardCount = testGame.handCount[thisPlayer] + testGame.deckCount[thisPlayer] + testGame.handCount[thisPlayer];
-
-
-     cardEffect(adventurer, choice1, choice2, choice3, &testGame, handpos, &bonus);
-
-     printf("TEST 2:\n\tHand Count, post-effect\n");
-
-     printf("\tplayer 0 hand count = %d, expected = %d\n", testGame.handCount[thisPlayer], controlGame.handCount[thisPlayer]+2);
-     if (testGame.handCount[thisPlayer] == controlGame.handCount[thisPlayer]+2) {
-          printf("\tPASS\n\n");
-          passCount++;
-     }
-     else {
-          printf("\tFAIL\n\n");
-          failCount++;
-     }
-
-     //   printf("\tplayer 0 hand+discard+deck count = %d, expected = %d\n", testGame.handCount[thisPlayer] + testGame.deckCount[thisPlayer] + testGame.handCount[thisPlayer], tmpTotalCardCount);
-     // if (testGame.handCount[thisPlayer] + testGame.deckCount[thisPlayer] + testGame.handCount[thisPlayer] == tmpTotalCardCount) {
-     //      printf("\tPASS\n\n");
-     //      passCount++;
-     // }
-     // else {
-     //      printf("\tFAIL\n\n");
-     //      failCount++;
-     // }
-
-     tmpTotalCardCount = testGame.handCount[thisPlayer] + testGame.deckCount[thisPlayer] + testGame.handCount[thisPlayer];
-
-     endTurn(&testGame);
-     endTurn(&testGame);
-
-
-     // cardEffect(adventurer, choice1, choice2, choice3, &testGame, handpos, &bonus);
-
-     printf("TEST 3:\n\tHand Count, post-effect\n");
-
-     printf("\tplayer 0 hand count = %d, expected = %d\n", testGame.handCount[thisPlayer], controlGame.handCount[thisPlayer]);
-     if (testGame.handCount[thisPlayer] == controlGame.handCount[thisPlayer]+4) {
-          printf("\tPASS\n\n");
-          passCount++;
-     }
-     else {
-          printf("\tFAIL\n\n");
-          failCount++;
-     }
-
-       printf("\tplayer 0 hand+deck+discard count = %d, expected = %d\n", testGame.discardCount[thisPlayer]+testGame.deckCount[thisPlayer]+testGame.handCount[thisPlayer], tmpTotalCardCount);
-     if (testGame.discardCount[thisPlayer]+testGame.deckCount[thisPlayer]+testGame.handCount[thisPlayer] == tmpTotalCardCount) {
-          printf("\tPASS\n\n");
-          passCount++;
-     }
-     else {
-          printf("\tFAIL\n\n");
-          failCount++;
-     }
-
-     
-     //endTurn(&testGame);
-     //endTurn(&testGame);
-
-//      cardEffect(adventurer, choice1, choice2, choice3, &testGame, handpos, &bonus);
-
-//      printf("TEST 4:\n\tHand Count, post-effect\n");
-
-//      printf("\tplayer 0 hand count = %d, expected = %d\n", testGame.handCount[thisPlayer], controlGame.handCount[thisPlayer]+6);
-//      if (testGame.handCount[thisPlayer] == controlGame.handCount[thisPlayer]+6) {
-//           printf("\tPASS\n\n");
-//           passCount++;
-//      }
-//      else {
-//           printf("\tFAIL\n\n");
-//           failCount++;
-//      }
-
-//        printf("\tplayer 0 discard count = %d, expected = %d\n", testGame.discardCount[thisPlayer], controlGame.discardCount[thisPlayer]);
-//      if (testGame.discardCount[thisPlayer] == controlGame.discardCount[thisPlayer]) {
-//           printf("\tPASS\n\n");
-//           passCount++;
-//      }
-//      else {
-//           printf("\tFAIL\n\n");
-//           failCount++;
-//      }
-
-//      cardEffect(adventurer, choice1, choice2, choice3, &testGame, handpos, &bonus);
-
-//      printf("TEST 5:\n\tHand Count, post-effect\n");
-
-//      printf("\tplayer 0 hand count = %d, expected = %d\n", testGame.handCount[thisPlayer], controlGame.handCount[thisPlayer]+8);
-//      if (testGame.handCount[thisPlayer] == controlGame.handCount[thisPlayer]+8) {
-//           printf("\tPASS\n\n");
-//           passCount++;
-//      }
-//      else {
-//           printf("\tFAIL\n\n");
-//           failCount++;
-//      }
-
-//   printf("\tplayer 0 discard count = %d, expected = %d\n", testGame.discardCount[thisPlayer], controlGame.discardCount[thisPlayer]);
-//      if (testGame.discardCount[thisPlayer] == controlGame.discardCount[thisPlayer]) {
-//           printf("\tPASS\n\n");
-//           passCount++;
-//      }
-//      else {
-//           printf("\tFAIL\n\n");
-//           failCount++;
-//      }
-
-//           cardEffect(adventurer, choice1, choice2, choice3, &testGame, handpos, &bonus);
-
-//      printf("TEST 6:\n\tHand Count, post-effect\n");
-
-//      printf("\tplayer 0 hand count = %d, expected = %d\n", testGame.handCount[thisPlayer], controlGame.handCount[thisPlayer]+10);
-//      if (testGame.handCount[thisPlayer] == controlGame.handCount[thisPlayer]+10) {
-//           printf("\tPASS\n\n");
-//           passCount++;
-//      }
-//      else {
-//           printf("\tFAIL\n\n");
-//           failCount++;
-//      }
-
-
-//   printf("\tplayer 0 discard count = %d, expected = %d\n", testGame.discardCount[thisPlayer], controlGame.discardCount[thisPlayer]);
-//      if (testGame.discardCount[thisPlayer] == controlGame.discardCount[thisPlayer]) {
-//           printf("\tPASS\n\n");
-//           passCount++;
-//      }
-//      else {
-//           printf("\tFAIL\n\n");
-//           failCount++;
-//      }
-
-     printf("ADVENTURER PASS COUNT:\t%d\n", passCount);
-     printf("ADVENTURER FAIL COUNT:\t%d\n", failCount);
-	return 0;
+/*Compares expected integer value with actual integer value,
+ * printing failure if not equal, passed if equal and printing their values.*/
+void myAssert(int expected, int actual){
+	//assert failure
+	if(expected != actual){
+		printf("TEST FAILED: expected = %d, actual = %d.\n", expected, actual);
+		allTestsPassed = 0;
+	}else{
+		//assert pass
+		printf("TEST PASSED: expected = %d, actual = %d.\n", expected, actual);
+	}
 }
 
+int main(){
+	printf("TESTING council room  -- cardtest2.c -- :\n\n"); 
+  //set up an initial 4 player game with a random seed of 10 and 10 arbitrary kingdom cards, into curState
+  int kingdomCards[10] = {adventurer, council_room, feast, ambassador, cutpurse, remodel, smithy, village, embargo, outpost};
+  struct gameState curState, prevState;
+  int numPlayers = 4, randomSeed = 10, i, discardCount = 1, drawCount = 4,
+			choice1 = 0, choice2 = 0, choice3 = 0, handPos = 4, bonus;
+  initializeGame(numPlayers, kingdomCards, randomSeed, &curState);
+	//set the fifth card in player 1's hand to be council_room and save state to prevState
+	curState.hand[0][4] = council_room;
+	memcpy(&prevState, &curState, sizeof(struct gameState));
+	//play council room
+	cardEffect(council_room, choice1, choice2, choice3, &curState, handPos, &bonus);
+	printf("TESTING player 1's hand count increased by 4, expected hand size 8 (after discarding council room).\n");
+	myAssert(prevState.handCount[0] + drawCount - discardCount, curState.handCount[0]);
+	printf("TESTING player 1's deck count decreased by 4 , expected deck size 1.\n");
+	myAssert(prevState.deckCount[0] - drawCount, curState.deckCount[0]);
+	printf("TESTING the 4 cards added to player 1's hand were the top 4 cards of the previous deck.\n");
+	int deckCounter = prevState.deckCount[0];
+	//discard mechanic in dominion.c works by replacing the last card in hand with the discarded position, hence the ordering
+	myAssert(prevState.deck[0][deckCounter - 4], curState.hand[0][4]);
+	myAssert(prevState.deck[0][deckCounter - 1], curState.hand[0][5]);
+	myAssert(prevState.deck[0][deckCounter - 2], curState.hand[0][6]);
+	myAssert(prevState.deck[0][deckCounter - 3], curState.hand[0][7]);
+	printf("TESTING player 1's buy count increased by 1 , expected count 2.\n");
+	myAssert(prevState.numBuys + 1, curState.numBuys);
+	printf("TESTING no changes in victory or kingdom card supplies.\n");
+	for(i = curse; i < treasure_map; i++){
+		myAssert(prevState.supplyCount[i], curState.supplyCount[i]);
+	}
+	printf("TESTING each other player's hand count has increased by 1.\n");
+	for(i = 1; i < 4; i++){
+		myAssert(prevState.handCount[i] + 1, curState.handCount[i]);
+	}
+	printf("TESTING each other player's deck count decreased by 1, expected deck size 9.\n");
+	for(i = 1; i < 4; i++){
+		myAssert(prevState.deckCount[i] - 1, curState.deckCount[i]);
+	}
+	printf("TESTING the card added to each other player's hand was the top card of the previous deck.\n");
+	for(i = 1; i < 4; i++){
+		myAssert(prevState.deck[i][prevState.deckCount[i] - 1], curState.hand[i][0]);
+	}
+	if(allTestsPassed){
+		printf("TEST SUCCESSFULLY COMPLETED.\n\n");
+	}else{
+    printf("TEST HAS FAILED.\n\n");
+  }
+
+	return 0;
+}

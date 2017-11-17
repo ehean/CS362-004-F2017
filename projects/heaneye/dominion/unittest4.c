@@ -1,393 +1,90 @@
-/***********************************************************************
- ** Unit Test 4
- ** This performs a unit test of the isGameOver function in dominion.c
- ** Conditions:
- **       if supplyCount[province] == 0:
- **            return 1
- **       else if supplyCounts of 3 or more cards == 0:
- **            return 1
- **       else
- **            return 0
- **       
- ***********************************************************************/
+/*-James Todd
+ *-toddjam
+ *-CS_362_400
+ *-Assignment 3
+ *-unittest4.c
+ *- Unit test for getWinners()
+ *-10/22/17*/
 
 #include "dominion.h"
 #include "dominion_helpers.h"
-#include "rngs.h"
 #include <string.h>
 #include <stdio.h>
-#include <assert.h>
+#include "rngs.h"
 #include <stdlib.h>
 
-int main()
-{
-     int numPlayers = 4; 
-     int kingdomCards[10] = {adventurer, embargo, village, minion, mine, cutpurse, sea_hag, tribute, smithy, council_room};
-     int randomSeed = 1000;
-     struct gameState controlGame, testGame;
-     int handPos = 0;
-     int passCount = 0;
-     int failCount = 0;
-     int thisPlayer = 0;
+//Game rules from http://riograndegames.com/uploads/Game/Game_278_gameRules.pdf
 
-     // initialize control game state
-     initializeGame(numPlayers, kingdomCards, randomSeed, &controlGame);
+//int acting as a boolean to determine if all tests have passed at the end of test code
+int allTestsPassed = 1;
 
-     controlGame.numBuys = 0;
+/*Compares expected integer array with actual integer arrays,
+ * returning 0 if not equal, 1 if equal and printing their values.*/
+int myArrayAssert(int expected[], int actual[], int length){
+	//assert failure
+	int i;
+	for(i = 0; i < length; i++){
+		if(expected[i] != actual[i]){
+			printf("TEST FAILED: expected[%d] = %d, actual[%d] = %d.\n", i, expected[i], i, actual[i]);
+			allTestsPassed = 0;
+			return 0;
+		}
+	}
+	//assert pass
+	printf("TEST PASSED: expected and actual arrays equal.\n");
+	return 1;
+}
 
-     memcpy(&testGame, &controlGame, sizeof(struct gameState));
+int main(){
+	printf("TESTING getWinners() -- unittest4.c -- :\n\n");
+  //set up an initial 4 player game with a random seed of 10 and 10 arbitrary kingdom cards, into state
+  int kingdomCards[10] = {adventurer, council_room, feast, ambassador, cutpurse, remodel, smithy, village, embargo, outpost};
+  struct gameState state;
+	//create int arrays to hold the expected and actual results for who has won the game and return values for functions
+  int numPlayers = 4, randomSeed = 10, expectedResults[MAX_PLAYERS] = {1,1,1,1}, actualResults[MAX_PLAYERS], returnVal;
+  initializeGame(numPlayers, kingdomCards, randomSeed, &state);
+	//set all players to equal turn counts
+	state.whoseTurn = 3;
+	returnVal = getWinners(actualResults, &state);	
+	printf("TESTING a 4 player game with equal victory points and turn counts, expected score array {1,1,1,1}.\n");
+	myArrayAssert(expectedResults, actualResults, MAX_PLAYERS);
+	//give player 1 an extra turn
+	expectedResults[0] = 0;
+	state.whoseTurn = 0;
+	returnVal = getWinners(actualResults, &state);	
+	printf("TESTING a 4 player game with equal victory points but player 1 has one more turn, expected score array {0,1,1,1}.\n");
+	myArrayAssert(expectedResults, actualResults, MAX_PLAYERS);
+	//give player 1 extra victory points
+	expectedResults[0] = 1;
+	expectedResults[1] = 0;
+	expectedResults[2] = 0;
+	expectedResults[3] = 0;
+	printf("TESTING a 4 player game where player 1 has extra victory points over 2,3,4 by gaining an estate in discard, expected score array {1,0,0,0}.\n");
+	//make sure player 1 successfully gains estate
+	if((returnVal = gainCard(estate, &state, 0, 0))!= 0){
+		printf("Failed to gain estate to player 1's discard.\n");
+		allTestsPassed = 0;
+	}else{
+		returnVal = getWinners(actualResults, &state);
+		myArrayAssert(expectedResults, actualResults, MAX_PLAYERS);
+	}
+	//test a 2 player game to see that unitialized player's win states handled correctly
+	struct gameState otherState;
+	numPlayers = 2;
+  initializeGame(numPlayers, kingdomCards, randomSeed, &otherState);
+	//set all players to equal turn counts
+	otherState.whoseTurn = 1;
+	returnVal = getWinners(actualResults, &otherState);	
+	printf("TESTING a 2 player game with equal victory points and turn counts, expected score array {1,1,-9999,-9999}.\n");
+	expectedResults[1] = 1;
+	expectedResults[2] = -9999;
+	expectedResults[3] = -9999;
+	myArrayAssert(expectedResults, actualResults, MAX_PLAYERS);
+	if(allTestsPassed){
+		printf("TEST SUCCESSFULLY COMPLETED.\n\n");
+	}else{
+    printf("TEST HAS FAILED.\n\n");
+  }
 
-     printf("TEST 1:\n\tsupplyCount[province] == 1\n\n");
-     printf("PRE-CONDITION:\n\n");
-     printf("\tsupplyCount[province] = %d, expected = %d\n", testGame.supplyCount[province], controlGame.supplyCount[province]);
-     if (testGame.supplyCount[province] == controlGame.supplyCount[province]) {
-          printf("\tPASS\n\n");
-          passCount++;
-     }
-     else {
-          printf("\tFAIL\n\n");
-          failCount++;
-     }
-
-     /* Count the number of empty decks in test and control */
-     int testEmptySupplyDecks = 0;
-     int controlEmptySupplyDecks = 0;
-     int i;
-     for (i = 0; i < 25; i++) {
-          if (testGame.supplyCount[i] == 0) {
-	          testEmptySupplyDecks++;
-	     }
-          if (controlGame.supplyCount[i] == 0) {
-	          controlEmptySupplyDecks++;
-	     }
-     }
-
-     printf("\tNum Empty Supply decks = %d, expected = %d\n", testEmptySupplyDecks, controlEmptySupplyDecks);
-     if (testEmptySupplyDecks == controlEmptySupplyDecks) {
-          printf("\tPASS\n\n");
-          passCount++;
-     }
-     else {
-          printf("\tFAIL\n\n");
-          failCount++;
-     }
-
-     int r;
-     r = isGameOver(&testGame);
-
-     printf("POST-CONDITION:\n\n");
-
-     printf("\tisGameOver = %d, expected = %d\n", r, 0);
-     if (r == 0) {
-          printf("\tPASS\n\n");
-          passCount++;
-     }
-     else {
-          printf("\tFAIL\n\n");
-          failCount++;
-     }
-
-     printf("\tsupplyCount[province] = %d, expected = %d\n", testGame.supplyCount[province], controlGame.supplyCount[province]);
-     if (testGame.supplyCount[province] == controlGame.supplyCount[province]) {
-          printf("\tPASS\n\n");
-          passCount++;
-     }
-     else {
-          printf("\tFAIL\n\n");
-          failCount++;
-     }
-
-     /* Count the number of empty decks in test and control */
-     testEmptySupplyDecks = 0;
-     controlEmptySupplyDecks = 0;
-     for (i = 0; i < 25; i++) {
-          if (testGame.supplyCount[i] == 0) {
-	          testEmptySupplyDecks++;
-	     }
-          if (controlGame.supplyCount[i] == 0) {
-	          controlEmptySupplyDecks++;
-	     }
-     }
-
-     printf("\tNum Empty Supply decks = %d, expected = %d\n", testEmptySupplyDecks, controlEmptySupplyDecks);
-     if (testEmptySupplyDecks == controlEmptySupplyDecks) {
-          printf("\tPASS\n\n");
-          passCount++;
-     }
-     else {
-          printf("\tFAIL\n\n");
-          failCount++;
-     }
-
-
-
-     // initialize control game state
-     initializeGame(numPlayers, kingdomCards, randomSeed, &controlGame);
-
-     controlGame.supplyCount[estate] = 0;
-     controlGame.supplyCount[duchy] = 0;
-
-     memcpy(&testGame, &controlGame, sizeof(struct gameState));
-
-     printf("TEST 1:\n\tnumber of empty supply decks == 2\n\n");
-     printf("PRE-CONDITION:\n\n");
-     printf("\tsupplyCount[province] = %d, expected = %d\n", testGame.supplyCount[province], controlGame.supplyCount[province]);
-     if (testGame.supplyCount[province] == controlGame.supplyCount[province]) {
-          printf("\tPASS\n\n");
-          passCount++;
-     }
-     else {
-          printf("\tFAIL\n\n");
-          failCount++;
-     }
-
-     /* Count the number of empty decks in test and control */
-     testEmptySupplyDecks = 0;
-     controlEmptySupplyDecks = 0;
-     for (i = 0; i < 25; i++) {
-          if (testGame.supplyCount[i] == 0) {
-	          testEmptySupplyDecks++;
-	     }
-          if (controlGame.supplyCount[i] == 0) {
-	          controlEmptySupplyDecks++;
-	     }
-     }
-
-     printf("\tNum Empty Supply decks = %d, expected = %d\n", testEmptySupplyDecks, controlEmptySupplyDecks);
-     if (testEmptySupplyDecks == controlEmptySupplyDecks) {
-          printf("\tPASS\n\n");
-          passCount++;
-     }
-     else {
-          printf("\tFAIL\n\n");
-          failCount++;
-     }
-
-     r = isGameOver(&testGame);
-
-     printf("POST-CONDITION:\n\n");
-
-     printf("\tisGameOver = %d, expected = %d\n", r, 0);
-     if (r == 0) {
-          printf("\tPASS\n\n");
-          passCount++;
-     }
-     else {
-          printf("\tFAIL\n\n");
-          failCount++;
-     }
-
-     printf("\tsupplyCount[province] = %d, expected = %d\n", testGame.supplyCount[province], controlGame.supplyCount[province]);
-     if (testGame.supplyCount[province] == controlGame.supplyCount[province]) {
-          printf("\tPASS\n\n");
-          passCount++;
-     }
-     else {
-          printf("\tFAIL\n\n");
-          failCount++;
-     }
-
-     /* Count the number of empty decks in test and control */
-     testEmptySupplyDecks = 0;
-     controlEmptySupplyDecks = 0;
-     for (i = 0; i < 25; i++) {
-          if (testGame.supplyCount[i] == 0) {
-	          testEmptySupplyDecks++;
-	     }
-          if (controlGame.supplyCount[i] == 0) {
-	          controlEmptySupplyDecks++;
-	     }
-     }
-
-     printf("\tNum Empty Supply decks = %d, expected = %d\n", testEmptySupplyDecks, controlEmptySupplyDecks);
-     if (testEmptySupplyDecks == controlEmptySupplyDecks) {
-          printf("\tPASS\n\n");
-          passCount++;
-     }
-     else {
-          printf("\tFAIL\n\n");
-          failCount++;
-     }
-
-     // initialize control game state
-     initializeGame(numPlayers, kingdomCards, randomSeed, &controlGame);
-
-     controlGame.supplyCount[province] = 0;
-
-     memcpy(&testGame, &controlGame, sizeof(struct gameState));
-
-     printf("TEST 1:\n\tnumber of empty supply decks == 2\n\n");
-     printf("PRE-CONDITION:\n\n");
-     printf("\tsupplyCount[province] = %d, expected = %d\n", testGame.supplyCount[province], controlGame.supplyCount[province]);
-     if (testGame.supplyCount[province] == controlGame.supplyCount[province]) {
-          printf("\tPASS\n\n");
-          passCount++;
-     }
-     else {
-          printf("\tFAIL\n\n");
-          failCount++;
-     }
-
-     /* Count the number of empty decks in test and control */
-     testEmptySupplyDecks = 0;
-     controlEmptySupplyDecks = 0;
-     for (i = 0; i < 25; i++) {
-          if (testGame.supplyCount[i] == 0) {
-	          testEmptySupplyDecks++;
-	     }
-          if (controlGame.supplyCount[i] == 0) {
-	          controlEmptySupplyDecks++;
-	     }
-     }
-
-     printf("\tNum Empty Supply decks = %d, expected = %d\n", testEmptySupplyDecks, controlEmptySupplyDecks);
-     if (testEmptySupplyDecks == controlEmptySupplyDecks) {
-          printf("\tPASS\n\n");
-          passCount++;
-     }
-     else {
-          printf("\tFAIL\n\n");
-          failCount++;
-     }
-
-     r = isGameOver(&testGame);
-
-     printf("POST-CONDITION:\n\n");
-
-     printf("\tisGameOver = %d, expected = %d\n", r, 1);
-     if (r == 1) {
-          printf("\tPASS\n\n");
-          passCount++;
-     }
-     else {
-          printf("\tFAIL\n\n");
-          failCount++;
-     }
-
-     printf("\tsupplyCount[province] = %d, expected = %d\n", testGame.supplyCount[province], controlGame.supplyCount[province]);
-     if (testGame.supplyCount[province] == controlGame.supplyCount[province]) {
-          printf("\tPASS\n\n");
-          passCount++;
-     }
-     else {
-          printf("\tFAIL\n\n");
-          failCount++;
-     }
-
-     /* Count the number of empty decks in test and control */
-     testEmptySupplyDecks = 0;
-     controlEmptySupplyDecks = 0;
-     for (i = 0; i < 25; i++) {
-          if (testGame.supplyCount[i] == 0) {
-	          testEmptySupplyDecks++;
-	     }
-          if (controlGame.supplyCount[i] == 0) {
-	          controlEmptySupplyDecks++;
-	     }
-     }
-
-     printf("\tNum Empty Supply decks = %d, expected = %d\n", testEmptySupplyDecks, controlEmptySupplyDecks);
-     if (testEmptySupplyDecks == controlEmptySupplyDecks) {
-          printf("\tPASS\n\n");
-          passCount++;
-     }
-     else {
-          printf("\tFAIL\n\n");
-          failCount++;
-     }
-
-
-     // initialize control game state
-     initializeGame(numPlayers, kingdomCards, randomSeed, &controlGame);
-
-     controlGame.supplyCount[estate] = 0;
-     controlGame.supplyCount[duchy] = 0;
-     controlGame.supplyCount[village] = 0;
-
-     memcpy(&testGame, &controlGame, sizeof(struct gameState));
-
-     printf("TEST 4:\n\tnumber of empty supply decks == 3\n\n");
-     printf("PRE-CONDITION:\n\n");
-     printf("\tsupplyCount[province] = %d, expected = %d\n", testGame.supplyCount[province], controlGame.supplyCount[province]);
-     if (testGame.supplyCount[province] == controlGame.supplyCount[province]) {
-          printf("\tPASS\n\n");
-          passCount++;
-     }
-     else {
-          printf("\tFAIL\n\n");
-          failCount++;
-     }
-
-     /* Count the number of empty decks in test and control */
-     testEmptySupplyDecks = 0;
-     controlEmptySupplyDecks = 0;
-     for (i = 0; i < 25; i++) {
-          if (testGame.supplyCount[i] == 0) {
-	          testEmptySupplyDecks++;
-	     }
-          if (controlGame.supplyCount[i] == 0) {
-	          controlEmptySupplyDecks++;
-	     }
-     }
-
-     printf("\tNum Empty Supply decks = %d, expected = %d\n", testEmptySupplyDecks, controlEmptySupplyDecks);
-     if (testEmptySupplyDecks == controlEmptySupplyDecks) {
-          printf("\tPASS\n\n");
-          passCount++;
-     }
-     else {
-          printf("\tFAIL\n\n");
-          failCount++;
-     }
-
-     r = isGameOver(&testGame);
-
-     printf("POST-CONDITION:\n\n");
-
-     printf("\tisGameOver = %d, expected = %d\n", r, 1);
-     if (r == 1) {
-          printf("\tPASS\n\n");
-          passCount++;
-     }
-     else {
-          printf("\tFAIL\n\n");
-          failCount++;
-     }
-
-     printf("\tsupplyCount[province] = %d, expected = %d\n", testGame.supplyCount[province], controlGame.supplyCount[province]);
-     if (testGame.supplyCount[province] == controlGame.supplyCount[province]) {
-          printf("\tPASS\n\n");
-          passCount++;
-     }
-     else {
-          printf("\tFAIL\n\n");
-          failCount++;
-     }
-
-     /* Count the number of empty decks in test and control */
-     testEmptySupplyDecks = 0;
-     controlEmptySupplyDecks = 0;
-     for (i = 0; i < 25; i++) {
-          if (testGame.supplyCount[i] == 0) {
-	          testEmptySupplyDecks++;
-	     }
-          if (controlGame.supplyCount[i] == 0) {
-	          controlEmptySupplyDecks++;
-	     }
-     }
-
-     printf("\tNum Empty Supply decks = %d, expected = %d\n", testEmptySupplyDecks, controlEmptySupplyDecks);
-     if (testEmptySupplyDecks == controlEmptySupplyDecks) {
-          printf("\tPASS\n\n");
-          passCount++;
-     }
-     else {
-          printf("\tFAIL\n\n");
-          failCount++;
-     }
-
-
-
-     printf("ISGAMEOVER PASS COUNT:\t%d\n", passCount);
-     printf("ISGAMEOVER FAIL COUNT:\t%d\n", failCount);
+	return 0;
 }
