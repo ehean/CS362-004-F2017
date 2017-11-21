@@ -146,7 +146,77 @@ public class UrlValidatorTest extends TestCase {
    
    public void testYourFirstPartition()
    {
+	   UrlValidator urlVal = new UrlValidator(null, null, UrlValidator.ALLOW_ALL_SCHEMES);
 	   
+	   /* MANUAL TEST PATHS */
+	   System.out.println("VALID TEST PATHS");
+	   
+	   /* EXPECTED RESULT: PASS */
+	   System.out.println(urlVal.isValid("http://www.amazon.com"));
+	   System.out.println(urlVal.isValid("http://www.amazon.com/test"));
+	   System.out.println(urlVal.isValid("http://www.amazon.com/"));
+	   System.out.println(urlVal.isValid("http://www.amazon.com/123"));
+	   System.out.println(urlVal.isValid("http://www.amazon.com/@"));
+	   System.out.println(urlVal.isValid("http://www.amazon.com/&"));
+	   
+	   /* NOT SURE WHY '?' RETURNS FALSE */
+	   System.out.println(urlVal.isValid("http://www.amazon.com/?"));
+	   System.out.println(urlVal.isValid("http://www.amazon.com/="));
+	   System.out.println(urlVal.isValid("http://www.amazon.com/+"));
+	   System.out.println(urlVal.isValid("http://www.amazon.com/,"));
+	   System.out.println(urlVal.isValid("http://www.amazon.com/."));
+	   System.out.println(urlVal.isValid("http://www.amazon.com/!"));
+	   System.out.println(urlVal.isValid("http://www.amazon.com/~"));
+	   System.out.println(urlVal.isValid("http://www.amazon.com/*"));
+	   System.out.println(urlVal.isValid("http://www.amazon.com/'"));
+	   System.out.println(urlVal.isValid("http://www.amazon.com/%"));
+	   System.out.println(urlVal.isValid("http://www.amazon.com/$"));
+	   System.out.println(urlVal.isValid("http://www.amazon.com/_"));
+	   System.out.println(urlVal.isValid("http://www.amazon.com/;"));
+	   System.out.println(urlVal.isValid("http://www.amazon.com/("));
+	   System.out.println(urlVal.isValid("http://www.amazon.com/)"));
+	   System.out.println(urlVal.isValid("http://www.amazon.com/test/"));
+	   
+	   
+	   /* MANUAL TEST PATHS */
+	   System.out.println("INVALID TEST PATHS");
+	   
+	   /* EXPECTED RESULT: FAIL */
+	   System.out.println(urlVal.isValid("http://www.amazon.com/\\"));
+	   System.out.println(urlVal.isValid("http://www.amazon.com["));
+	   System.out.println(urlVal.isValid("http://www.amazon.com/]"));
+	   
+	   /* NOT SURE WHY '//' RETURNS FALSE */
+	   System.out.println(urlVal.isValid("http://www.amazon.com//"));
+	   System.out.println(urlVal.isValid("http://www.amazon.com/(("));
+	   System.out.println(urlVal.isValid("http://www.amazon.com/~~"));
+	   
+	   
+//	   String tooLong = null;
+//	   for (int i = 0; i < Integer.MAX_VALUE; i++) {
+//		   tooLong += "a";
+//	   }
+//	   
+//	   
+//	   System.out.println(urlVal.isValid("http://www.amazon.com/" + tooLong));
+	   
+	   
+	   
+	   Integer intTest = 1;
+	   System.out.println(urlVal.isValid("http://www.amazon.com/" + intTest));
+	   Boolean boolTest = true;
+	   System.out.println(urlVal.isValid("http://www.amazon.com/" + boolTest));	 
+	   Double floatTest = 1.0;
+	   System.out.println(urlVal.isValid("http://www.amazon.com/" + floatTest));
+	   Character charTest = 'a';
+	   System.out.println(urlVal.isValid("http://www.amazon.com/" + charTest));
+	   
+	   
+	   
+	   /* VALID QUERY TESTS */
+	   System.out.println("VALID QUERY PATHS");
+	   
+	   System.out.println(urlVal.isValid("http://www.amazon.com/test?action=view"));
    }
    
    public void testYourSecondPartition(){
