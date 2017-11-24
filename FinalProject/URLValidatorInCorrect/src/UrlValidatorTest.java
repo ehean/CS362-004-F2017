@@ -41,7 +41,6 @@ public class UrlValidatorTest extends TestCase {
    public void testManualTest()
    {
 	   UrlValidator urlVal = new UrlValidator(null, null, UrlValidator.ALLOW_ALL_SCHEMES);
-	   
 	   /* MANUAL TEST SCHEMES */
 	   System.out.println("VALID MANUAL TEST SCHEMES");
 	   
@@ -143,7 +142,6 @@ public class UrlValidatorTest extends TestCase {
 	   assertFalse("An otherwise valid URL with a query ending in'##' should be invalid as '#' starts a fragment and '#' is not a valid fragment.", urlVal.isValid("http://www.google.com:80/?##"));
    }
    
-   
    public void testYourFirstPartition()
    {
 	   UrlValidator urlVal = new UrlValidator(null, null, UrlValidator.ALLOW_ALL_SCHEMES);
@@ -219,9 +217,47 @@ public class UrlValidatorTest extends TestCase {
 	   System.out.println(urlVal.isValid("http://www.amazon.com/test?action=view"));
    }
    
-   public void testYourSecondPartition(){
-	   
+   /*test schemes partitioned by beginning valid letters [a,z], [A,Z], invalid chars above and below these values, ending valid numbers [0,9], letters [a,z], [A,Z],
+   invalid chars above and below these values, ., +, and - */
+   public void testSchemePartitions()
+   {
+	   UrlValidator urlVal = new UrlValidator(null, null, UrlValidator.ALLOW_ALL_SCHEMES);
+	   //schemes beginning with min and max valid lowercase letters a,z
+	   assertTrue("Otherwise valid url beginning with minimum valid lowercase letter (a) should be valid", urlVal.isValid("a://www.google.com"));
+	   assertTrue("Otherwise valid url beginning with maximum valid lowercase letter (z) should be valid", urlVal.isValid("z://www.google.com"));
+	   //schemes beginning with ASCII chars above and below min and max valid lowercase letters a,z
+	   assertFalse("Otherwise valid url beginning with maximum invalid ASCII char below lowercase range (`) should be invalid", urlVal.isValid("`://www.google.com"));
+	   assertFalse("Otherwise valid url beginning with minimum invalid ASCII char above lowercase range ({) should be invalid", urlVal.isValid("{://www.google.com"));
+	   //schemes beginning with min and max valid uppercase letters A,Z
+	   assertTrue("Otherwise valid url beginning with minimum valid uppercase letter (A) should be valid", urlVal.isValid("A://www.google.com"));
+	   assertTrue("Otherwise valid url beginning with maximum valid uppercase letter (Z) should be valid", urlVal.isValid("Z://www.google.com"));
+	   //schemes beginning with ASCII chars above and below min and max valid uppercase letters A,Z
+	   assertFalse("Otherwise valid url beginning with maximum invalid ASCII char below uppercase range (@) should be invalid", urlVal.isValid("@://www.google.com"));
+	   assertFalse("Otherwise valid url beginning with minimum invalid ASCII char above uppercase range ([) should be invalid", urlVal.isValid("[://www.google.com"));
+	   //schemes ending with min and max valid numbers 0,9
+	   assertTrue("Otherwise valid url ending with minimum valid number (0) should be valid", urlVal.isValid("a0://www.google.com"));
+	   assertTrue("Otherwise valid url ending with maximum valid number (9) should be valid", urlVal.isValid("a9://www.google.com"));
+	   //schemes beginning with min and max valid numbers 0,9 should be invalid
+	   assertFalse("Otherwise valid url beginning with minimum valid number (0) should be invalid", urlVal.isValid("0a://www.google.com"));
+	   assertFalse("Otherwise valid url beginning with maximum valid number (9) should be invalid", urlVal.isValid("9a://www.google.com"));
+	   //schemes ending with min and max valid lowercase letters a,z
+	   assertTrue("Otherwise valid url ending with minimum valid lowercase letter (a) should be valid", urlVal.isValid("aa://www.google.com"));
+	   assertTrue("Otherwise valid url ending with maximum valid lowercase letter (z) should be valid", urlVal.isValid("az://www.google.com"));
+	   //schemes ending with ASCII chars above and below min and max valid lowercase letters a,z
+	   assertFalse("Otherwise valid url ending with maximum invalid ASCII char below lowercase range (`) should be invalid", urlVal.isValid("a`://www.google.com"));
+	   assertFalse("Otherwise valid url ending with minimum invalid ASCII char above lowercase range ({) should be invalid", urlVal.isValid("a{://www.google.com"));
+	   //schemes ending with min and max valid uppercase letters A,Z
+	   assertTrue("Otherwise valid url ending with minimum valid uppercase letter (A) should be valid", urlVal.isValid("aA://www.google.com"));
+	   assertTrue("Otherwise valid url ending with maximum valid uppercase letter (Z) should be valid", urlVal.isValid("aZ://www.google.com"));
+	   //schemes ending with ASCII chars above and below min and max valid uppercase letters A,Z
+	   assertFalse("Otherwise valid url ending with maximum invalid ASCII char below uppercase range (@) should be invalid", urlVal.isValid("a@://www.google.com"));
+	   assertFalse("Otherwise valid url ending with minimum invalid ASCII char above uppercase range ([) should be invalid", urlVal.isValid("a[://www.google.com"));
+	   //schemes ending with . or + or -
+	   assertTrue("Otherwise valid url ending with . should be valid", urlVal.isValid("a.://www.google.com"));
+	   assertTrue("Otherwise valid url ending with + should be valid", urlVal.isValid("a+://www.google.com"));
+	   assertTrue("Otherwise valid url ending with - should be valid", urlVal.isValid("a-://www.google.com"));
    }
+   
    //Test authorities in the IPv4 format [0.0.0.0, 255.255.255.255] and reg-name host name format: dot delimited [a,z] [0,9], - https://en.wikipedia.org/wiki/Hostname
    public void testAuthorityPartitions()
    {
@@ -281,7 +317,13 @@ public class UrlValidatorTest extends TestCase {
 		urlVal.isValid("http://www.google.com:" + (int)Integer.MAX_VALUE));
 
    }
-   ResultPair[] testSchemes = {
+  
+ 
+   
+   public void testIsValid()
+   {
+	   UrlValidator urlVal = new UrlValidator(null, null, UrlValidator.ALLOW_ALL_SCHEMES);
+	   ResultPair[] testSchemes = {
 			   new ResultPair("", true), 
 			   new ResultPair("x://", true), 
 			   new ResultPair("Y://", true), 
@@ -305,6 +347,7 @@ public class UrlValidatorTest extends TestCase {
 			   new ResultPair("o1j-://", true), 
 			   new ResultPair("R5.://", true)
 			   };
+	   
 	   String maxAuth = "";
 	   for(int i = 0; i < 10; i++){
 		   maxAuth += "abcdEFGH104abcdEFGH104.";
@@ -344,20 +387,38 @@ public class UrlValidatorTest extends TestCase {
 			   new ResultPair("69123", false),
 			   new ResultPair("123382", false)
 			   };
-   
-   public void testIsValid()
-   {
-	   for(int i = 0;i<10000;i++)
-	   {
-		   
+	   
+	   ResultPair[] testPaths = {new ResultPair("", true)};
+	   
+	   ResultPair[] testQueries = {new ResultPair("", true)};
+	   int passed = 0, failed = 0;
+	   for(int i = 0; i < testSchemes.length; i++) {
+		   for(int j = 0; j < testAuthorities.length; j++) {
+			   for(int k = 0; k < testPorts.length; k++) {
+				   for(int l = 0; l < testPaths.length; l++) {
+					   for(int m = 0; m < testQueries.length; m++) {
+						   Boolean expected = testSchemes[i].valid && testAuthorities[j].valid && testPorts[k].valid && testPaths[l].valid && testQueries[m].valid;
+						   System.out.println("Testing: " + testSchemes[i].item + testAuthorities[j].item + testPorts[k].item + testPaths[l].item + testQueries[m].item);
+						   boolean result = expected == urlVal.isValid(testSchemes[i].item + testAuthorities[j].item + testPorts[k].item + testPaths[l].item + testQueries[m].item);
+						   if(result) {
+							   passed++;
+						   }else {
+							   failed++;
+						   }
+						   System.out.println(result);
+						   
+					   }
+				   }
+			   }
+		   }
 	   }
+	   System.out.println("Failed = " + failed + "\nPassed = " + passed);
    }
    
    public void testAnyOtherUnitTest()
    {
 	   
    }
-}
    /**
     * Create set of tests by taking the testUrlXXX arrays and
     * running through all possible permutations of their combinations.
@@ -366,49 +427,4 @@ public class UrlValidatorTest extends TestCase {
     */
    
 
-
-
-//ResultPair[] testPath = {new ResultPair("/test1", true),
-//   new ResultPair("/t123", true),
-//   new ResultPair("/$23", true),
-//   new ResultPair("/..", false),
-//   new ResultPair("/../", false),
-//   new ResultPair("/test1/", true),
-//   new ResultPair("", true),
-//   new ResultPair("/test1/file", true),
-//   new ResultPair("/..//file", false),
-//   new ResultPair("/test1//file", false)
-//};
-////Test allow2slash, noFragment
-//ResultPair[] testUrlPathOptions = {new ResultPair("/test1", true),
-//             new ResultPair("/t123", true),
-//             new ResultPair("/$23", true),
-//             new ResultPair("/..", false),
-//             new ResultPair("/../", false),
-//             new ResultPair("/test1/", true),
-//             new ResultPair("/#", false),
-//             new ResultPair("", true),
-//             new ResultPair("/test1/file", true),
-//             new ResultPair("/t123/file", true),
-//             new ResultPair("/$23/file", true),
-//             new ResultPair("/../file", false),
-//             new ResultPair("/..//file", false),
-//             new ResultPair("/test1//file", true),
-//             new ResultPair("/#/file", false)
-//};
-//
-//ResultPair[] testUrlQuery = {new ResultPair("?action=view", true),
-//       new ResultPair("?action=edit&mode=up", true),
-//       new ResultPair("", true)
-//};
-//
-//Object[] testUrlParts = {testUrlScheme, testUrlAuthority, testUrlPort, testPath, testUrlQuery};
-//Object[] testUrlPartsOptions = {testUrlScheme, testUrlAuthority, testUrlPort, testUrlPathOptions, testUrlQuery};
-//int[] testPartsIndex = {0, 0, 0, 0, 0};
-//
-////---------------- Test data for individual url parts ----------------
-//ResultPair[] testScheme = {new ResultPair("http", true),
-//     new ResultPair("ftp", false),
-//     new ResultPair("httpd", false),
-//     new ResultPair("telnet", false)
-//
+}
