@@ -17,6 +17,7 @@
 
 
 import junit.framework.TestCase;
+import java.util.*;
 
 
 
@@ -28,6 +29,29 @@ import junit.framework.TestCase;
  * @version $Revision: 1128446 $ $Date: 2011-05-27 13:29:27 -0700 (Fri, 27 May 2011) $
  */
 public class UrlValidatorTest extends TestCase {
+	
+	
+	/* TEST CASE OBJECTS WILL HELP WITH ANALYZING TESTS */
+	public class TestCase {
+      public Integer number;
+      public ResultPair[] resultPairs;
+      public Boolean totalPass = true;
+      public Boolean schemePass = true,
+    		  authorityPass = true, 
+    		  portPass = true, 
+    		  pathPass = true, 
+    		  queryPass = true;
+
+      public TestCase(Integer n, ResultPair[] p) {
+         this.number = n;
+         this.resultPairs = p;  
+      }
+      
+      public void testCasePass(Boolean p) {
+    	  this.totalPass = p;
+      }
+   }
+
 
    private boolean printStatus = false;
    private boolean printIndex = false;//print index that indicates current scheme,host,port,path, query test were using.
@@ -41,180 +65,180 @@ public class UrlValidatorTest extends TestCase {
    public void testManualTest()
    {
 	   UrlValidator urlVal = new UrlValidator(null, null, UrlValidator.ALLOW_ALL_SCHEMES);
-	   /* MANUAL TEST SCHEMES */
-	   System.out.println("VALID MANUAL TEST SCHEMES");
-	   
-	   /* EXPECTED RESULT: PASS */
-	   System.out.println(urlVal.isValid("http://www.amazon.com"));
-	   System.out.println(urlVal.isValid("https://www.amazon.com"));
-	   System.out.println(urlVal.isValid("h3t://www.amazon.com"));
-	   
-	   // THIS RETURNS A FALSE NEGATIVE
-	   System.out.println(urlVal.isValid("www.amazon.com"));
-	   System.out.println(urlVal.isValid("ftp://www.amazon.com"));
-	   System.out.println(urlVal.isValid("Http://www.amazon.com"));
-	  
-	   
-	   /* EXPECTED RESULT: FAIL */
-	   System.out.println("INVALID MANUAL TEST SCHEMES");
-	   System.out.println(urlVal.isValid("http:/www.amazon.com"));
-	   System.out.println(urlVal.isValid("http:www.amazon.com"));
-	   System.out.println(urlVal.isValid("http//www.amazon.com"));
-	   System.out.println(urlVal.isValid("://www.amazon.com"));
-	   System.out.println(urlVal.isValid("http:\\www.amazon.com"));
-	   
-	   
-	   /* MANUAL TEST AUTHORITY */
-	   
-	   System.out.println("VALID MANUAL TEST AUTHORITIES");
-	   
-	   /* EXPECTED RESULT: PASS */
-	   System.out.println(urlVal.isValid("http://amazon.com"));
-	   
-	   /* RETURNS FALSE NEGATIVE */
-	   System.out.println(urlVal.isValid("http://amazon.nz"));
-	   System.out.println(urlVal.isValid("http://0.0.0.0"));
-	   System.out.println(urlVal.isValid("http://255.255.255.255"));
-	   System.out.println(urlVal.isValid("http://128.com"));
-	   System.out.println(urlVal.isValid("http://amazon.gov"));
-	   
-	   /* EXPECTED RESULT: FAIL */
-	   System.out.println("INVALID MANUAL TEST AUTHORITIES");
-	   System.out.println(urlVal.isValid("http://amaz/on.com"));
-	   System.out.println(urlVal.isValid("http://amazon.nzs"));
-	   System.out.println(urlVal.isValid("http://0.0.0.-1"));
-	   
-	   /* RETURNS FALSE POSITIVE */
-	   System.out.println(urlVal.isValid("http://255.255.255.256"));
-	   System.out.println(urlVal.isValid("http://128..com"));
-	   System.out.println(urlVal.isValid("http://amaz?on.gov"));
-	   
-	   
-	   /* MANUAL TEST PORT */
-	   
-	   System.out.println("VALID MANUAL TEST PORTS");
-	   
-	   /* EXPECTED RESULT: PASS */
-	   System.out.println(urlVal.isValid("http://www.amazon.com:80"));
-	   
-	   /* RETURNS FALSE NEGATIVE */
-	   System.out.println(urlVal.isValid("http://www.amazon.com:65535"));
-	   System.out.println(urlVal.isValid("http://www.amazon.com:0"));
-	   System.out.println(urlVal.isValid("http://www.amazon.com"));
-	   System.out.println(urlVal.isValid("http://www.amazon.com:034"));
-	   
-	   /* EXPECTED RESULT: FAIL */
-	   System.out.println("INVALID MANUAL TEST AUTHORITIES");
-	   System.out.println(urlVal.isValid("http://www.amazon.com:"));
-	   System.out.println(urlVal.isValid("http://www.amazon.com:s"));
-	   System.out.println(urlVal.isValid("http://www.amazon.com:-1"));
-	   System.out.println(urlVal.isValid("http://www.amazon.com;0"));
-	   System.out.println(urlVal.isValid("http://www.amazon.com:09348248"));
-	   
-	   /*Test Paths*/
-	   //void path
-	   assertTrue("An otherwise valid URL with a void path should be valid.", urlVal.isValid("http://www.google.com:80"));
-	   //single valid xpalphas paths
-	   assertTrue("An otherwise valid URL with a single '+' path should be valid.", urlVal.isValid("http://www.google.com:80/+"));
-	   assertTrue("An otherwise valid URL with a single alpha 'a' path should be valid.", urlVal.isValid("http://www.google.com:80/a"));
-	   assertTrue("An otherwise valid URL with a single digit '0' path should be valid.", urlVal.isValid("http://www.google.com:80/0"));
-	   assertTrue("An otherwise valid URL with a single safe '$' path should be valid.", urlVal.isValid("http://www.google.com:80/$"));
-	   assertTrue("An otherwise valid URL with a single extra '!' path should be valid.", urlVal.isValid("http://www.google.com:80/!"));
-	   assertTrue("An otherwise valid URL with a single escape '%aa' path should be valid.", urlVal.isValid("http://www.google.com:80/%aa"));
-	   //multiple xpalphas path delimited by forward slashes
-	   assertTrue("An otherwise valid URL with xpalphas/xpalphas/ path should be valid.", urlVal.isValid("http://www.google.com:80/+a0$!%aa/+a0$!%aa/+a0$!%aa/"));
-	   //single invalid char paths
-	   assertFalse("An otherwise valid URL with a single reserved character '?' path should be invalid.", urlVal.isValid("http://www.google.com:80/?"));
-	   assertFalse("An otherwise valid URL with a single national character '{' path should be invalid.", urlVal.isValid("http://www.google.com:80/{"));
-	   assertFalse("An otherwise valid URL with a single punctuation character '<' path should be invalid.", urlVal.isValid("http://www.google.com:80/<"));
-	   //multiple invalid character paths delimited by forward slashes
-	   assertFalse("An otherwise valid URL with /invalidChars/invalidChars/ path should be invalid.", urlVal.isValid("http://www.google.com:80/?{</?{</?{</?{</"));
-	   //one valid character and one invalid character
-	   assertFalse("An otherwise valid URL with invalidChar+xpalphas path should be invalid.", urlVal.isValid("http://www.google.com:80/{a"));
-	   //mixing of invalid characters and invalid character paths delimited by forward slashes
-	   assertFalse("An otherwise valid URL with /invalidChars+validChars/invalidChars+validChars/ path should be invalid.", urlVal.isValid("http://www.google.com:80/+a0$!%aa?{</+a0$!%aa?{</"));
-	   /*Test Queries*/
-	   //void query
-	   assertTrue("An otherwise valid URL with a void query should be valid.", urlVal.isValid("http://www.google.com:80/"));
-	   //? query
-	   assertTrue("An otherwise valid URL with a query beginning with '?' to the end of the URL with no '#' should be valid.", urlVal.isValid("http://www.google.com:80/?a1+}{!@$%&^*"));
-	   //?##
-	   assertFalse("An otherwise valid URL with a query ending in'##' should be invalid as '#' starts a fragment and '#' is not a valid fragment.", urlVal.isValid("http://www.google.com:80/?##"));
+//	   /* MANUAL TEST SCHEMES */
+//	   System.out.println("VALID MANUAL TEST SCHEMES");
+//	   
+//	   /* EXPECTED RESULT: PASS */
+//	   System.out.println(urlVal.isValid("http://www.amazon.com"));
+//	   System.out.println(urlVal.isValid("https://www.amazon.com"));
+//	   System.out.println(urlVal.isValid("h3t://www.amazon.com"));
+//	   
+//	   // THIS RETURNS A FALSE NEGATIVE
+//	   System.out.println(urlVal.isValid("www.amazon.com"));
+//	   System.out.println(urlVal.isValid("ftp://www.amazon.com"));
+//	   System.out.println(urlVal.isValid("Http://www.amazon.com"));
+//	  
+//	   
+//	   /* EXPECTED RESULT: FAIL */
+//	   System.out.println("INVALID MANUAL TEST SCHEMES");
+//	   System.out.println(urlVal.isValid("http:/www.amazon.com"));
+//	   System.out.println(urlVal.isValid("http:www.amazon.com"));
+//	   System.out.println(urlVal.isValid("http//www.amazon.com"));
+//	   System.out.println(urlVal.isValid("://www.amazon.com"));
+//	   System.out.println(urlVal.isValid("http:\\www.amazon.com"));
+//	   
+//	   
+//	   /* MANUAL TEST AUTHORITY */
+//	   
+//	   System.out.println("VALID MANUAL TEST PATHS");
+//	   
+//	   /* EXPECTED RESULT: PASS */
+//	   System.out.println(urlVal.isValid("http://amazon.com"));
+//	   
+//	   /* RETURNS FALSE NEGATIVE */
+//	   System.out.println(urlVal.isValid("http://amazon.nz"));
+//	   System.out.println(urlVal.isValid("http://0.0.0.0"));
+//	   System.out.println(urlVal.isValid("http://255.255.255.255"));
+//	   System.out.println(urlVal.isValid("http://128.com"));
+//	   System.out.println(urlVal.isValid("http://amazon.gov"));
+//	   
+//	   /* EXPECTED RESULT: FAIL */
+//	   System.out.println("INVALID MANUAL TEST PATHS");
+//	   System.out.println(urlVal.isValid("http://amaz/on.com"));
+//	   System.out.println(urlVal.isValid("http://amazon.nzs"));
+//	   System.out.println(urlVal.isValid("http://0.0.0.-1"));
+//	   
+//	   /* RETURNS FALSE POSITIVE */
+//	   System.out.println(urlVal.isValid("http://255.255.255.256"));
+//	   System.out.println(urlVal.isValid("http://128..com"));
+//	   System.out.println(urlVal.isValid("http://amaz?on.gov"));
+//	   
+//	   
+//	   /* MANUAL TEST PORT */
+//	   
+//	   System.out.println("VALID MANUAL TEST PORTS");
+//	   
+//	   /* EXPECTED RESULT: PASS */
+//	   System.out.println(urlVal.isValid("http://www.amazon.com:80"));
+//	   
+//	   /* RETURNS FALSE NEGATIVE */
+//	   System.out.println(urlVal.isValid("http://www.amazon.com:65535"));
+//	   System.out.println(urlVal.isValid("http://www.amazon.com:0"));
+//	   System.out.println(urlVal.isValid("http://www.amazon.com"));
+//	   System.out.println(urlVal.isValid("http://www.amazon.com:034"));
+//	   
+//	   /* EXPECTED RESULT: FAIL */
+//	   System.out.println("INVALID MANUAL TEST PATHS");
+//	   System.out.println(urlVal.isValid("http://www.amazon.com:"));
+//	   System.out.println(urlVal.isValid("http://www.amazon.com:s"));
+//	   System.out.println(urlVal.isValid("http://www.amazon.com:-1"));
+//	   System.out.println(urlVal.isValid("http://www.amazon.com;0"));
+//	   System.out.println(urlVal.isValid("http://www.amazon.com:09348248"));
+//	   
+//	   /*Test Paths*/
+//	   //void path
+//	   assertTrue("An otherwise valid URL with a void path should be valid.", urlVal.isValid("http://www.google.com:80"));
+//	   //single valid xpalphas paths
+//	   assertTrue("An otherwise valid URL with a single '+' path should be valid.", urlVal.isValid("http://www.google.com:80/+"));
+//	   assertTrue("An otherwise valid URL with a single alpha 'a' path should be valid.", urlVal.isValid("http://www.google.com:80/a"));
+//	   assertTrue("An otherwise valid URL with a single digit '0' path should be valid.", urlVal.isValid("http://www.google.com:80/0"));
+//	   assertTrue("An otherwise valid URL with a single safe '$' path should be valid.", urlVal.isValid("http://www.google.com:80/$"));
+//	   assertTrue("An otherwise valid URL with a single extra '!' path should be valid.", urlVal.isValid("http://www.google.com:80/!"));
+//	   assertTrue("An otherwise valid URL with a single escape '%aa' path should be valid.", urlVal.isValid("http://www.google.com:80/%aa"));
+//	   //multiple xpalphas path delimited by forward slashes
+//	   assertTrue("An otherwise valid URL with xpalphas/xpalphas/ path should be valid.", urlVal.isValid("http://www.google.com:80/+a0$!%aa/+a0$!%aa/+a0$!%aa/"));
+//	   //single invalid char paths
+//	   assertFalse("An otherwise valid URL with a single reserved character '?' path should be invalid.", urlVal.isValid("http://www.google.com:80/?"));
+//	   assertFalse("An otherwise valid URL with a single national character '{' path should be invalid.", urlVal.isValid("http://www.google.com:80/{"));
+//	   assertFalse("An otherwise valid URL with a single punctuation character '<' path should be invalid.", urlVal.isValid("http://www.google.com:80/<"));
+//	   //multiple invalid character paths delimited by forward slashes
+//	   assertFalse("An otherwise valid URL with /invalidChars/invalidChars/ path should be invalid.", urlVal.isValid("http://www.google.com:80/?{</?{</?{</?{</"));
+//	   //one valid character and one invalid character
+//	   assertFalse("An otherwise valid URL with invalidChar+xpalphas path should be invalid.", urlVal.isValid("http://www.google.com:80/{a"));
+//	   //mixing of invalid characters and invalid character paths delimited by forward slashes
+//	   assertFalse("An otherwise valid URL with /invalidChars+validChars/invalidChars+validChars/ path should be invalid.", urlVal.isValid("http://www.google.com:80/+a0$!%aa?{</+a0$!%aa?{</"));
+//	   /*Test Queries*/
+//	   //void query
+//	   assertTrue("An otherwise valid URL with a void query should be valid.", urlVal.isValid("http://www.google.com:80/"));
+//	   //? query
+//	   assertTrue("An otherwise valid URL with a query beginning with '?' to the end of the URL with no '#' should be valid.", urlVal.isValid("http://www.google.com:80/?a1+}{!@$%&^*"));
+//	   //?##
+//	   assertFalse("An otherwise valid URL with a query ending in'##' should be invalid as '#' starts a fragment and '#' is not a valid fragment.", urlVal.isValid("http://www.google.com:80/?##"));
    }
    
    public void testYourFirstPartition()
    {
 	   UrlValidator urlVal = new UrlValidator(null, null, UrlValidator.ALLOW_ALL_SCHEMES);
 	   
-	   /* MANUAL TEST PATHS */
-	   System.out.println("VALID TEST PATHS");
-	   
-	   /* EXPECTED RESULT: PASS */
-	   System.out.println(urlVal.isValid("http://www.amazon.com"));
-	   System.out.println(urlVal.isValid("http://www.amazon.com/test"));
-	   System.out.println(urlVal.isValid("http://www.amazon.com/"));
-	   System.out.println(urlVal.isValid("http://www.amazon.com/123"));
-	   System.out.println(urlVal.isValid("http://www.amazon.com/@"));
-	   System.out.println(urlVal.isValid("http://www.amazon.com/&"));
-	   
-	   /* NOT SURE WHY '?' RETURNS FALSE */
-	   System.out.println(urlVal.isValid("http://www.amazon.com/?"));
-	   System.out.println(urlVal.isValid("http://www.amazon.com/="));
-	   System.out.println(urlVal.isValid("http://www.amazon.com/+"));
-	   System.out.println(urlVal.isValid("http://www.amazon.com/,"));
-	   System.out.println(urlVal.isValid("http://www.amazon.com/."));
-	   System.out.println(urlVal.isValid("http://www.amazon.com/!"));
-	   System.out.println(urlVal.isValid("http://www.amazon.com/~"));
-	   System.out.println(urlVal.isValid("http://www.amazon.com/*"));
-	   System.out.println(urlVal.isValid("http://www.amazon.com/'"));
-	   System.out.println(urlVal.isValid("http://www.amazon.com/%"));
-	   System.out.println(urlVal.isValid("http://www.amazon.com/$"));
-	   System.out.println(urlVal.isValid("http://www.amazon.com/_"));
-	   System.out.println(urlVal.isValid("http://www.amazon.com/;"));
-	   System.out.println(urlVal.isValid("http://www.amazon.com/("));
-	   System.out.println(urlVal.isValid("http://www.amazon.com/)"));
-	   System.out.println(urlVal.isValid("http://www.amazon.com/test/"));
-	   
-	   
-	   /* MANUAL TEST PATHS */
-	   System.out.println("INVALID TEST PATHS");
-	   
-	   /* EXPECTED RESULT: FAIL */
-	   System.out.println(urlVal.isValid("http://www.amazon.com/\\"));
-	   System.out.println(urlVal.isValid("http://www.amazon.com["));
-	   System.out.println(urlVal.isValid("http://www.amazon.com/]"));
-	   
-	   /* NOT SURE WHY '//' RETURNS FALSE */
-	   System.out.println(urlVal.isValid("http://www.amazon.com//"));
-	   System.out.println(urlVal.isValid("http://www.amazon.com/(("));
-	   System.out.println(urlVal.isValid("http://www.amazon.com/~~"));
-	   
-	   
-//	   String tooLong = null;
-//	   for (int i = 0; i < Integer.MAX_VALUE; i++) {
-//		   tooLong += "a";
-//	   }
+//	   /* MANUAL TEST PATHS */
+//	   System.out.println("VALID TEST PATHS");
+//	   
+//	   /* EXPECTED RESULT: PASS */
+//	   System.out.println(urlVal.isValid("http://www.amazon.com"));
+//	   System.out.println(urlVal.isValid("http://www.amazon.com/test"));
+//	   System.out.println(urlVal.isValid("http://www.amazon.com/"));
+//	   System.out.println(urlVal.isValid("http://www.amazon.com/123"));
+//	   System.out.println(urlVal.isValid("http://www.amazon.com/@"));
+//	   System.out.println(urlVal.isValid("http://www.amazon.com/&"));
+//	   
+//	   /* NOT SURE WHY '?' RETURNS FALSE */
+//	   System.out.println(urlVal.isValid("http://www.amazon.com/?"));
+//	   System.out.println(urlVal.isValid("http://www.amazon.com/="));
+//	   System.out.println(urlVal.isValid("http://www.amazon.com/+"));
+//	   System.out.println(urlVal.isValid("http://www.amazon.com/,"));
+//	   System.out.println(urlVal.isValid("http://www.amazon.com/."));
+//	   System.out.println(urlVal.isValid("http://www.amazon.com/!"));
+//	   System.out.println(urlVal.isValid("http://www.amazon.com/~"));
+//	   System.out.println(urlVal.isValid("http://www.amazon.com/*"));
+//	   System.out.println(urlVal.isValid("http://www.amazon.com/'"));
+//	   System.out.println(urlVal.isValid("http://www.amazon.com/%"));
+//	   System.out.println(urlVal.isValid("http://www.amazon.com/$"));
+//	   System.out.println(urlVal.isValid("http://www.amazon.com/_"));
+//	   System.out.println(urlVal.isValid("http://www.amazon.com/;"));
+//	   System.out.println(urlVal.isValid("http://www.amazon.com/("));
+//	   System.out.println(urlVal.isValid("http://www.amazon.com/)"));
+//	   System.out.println(urlVal.isValid("http://www.amazon.com/test/"));
 //	   
 //	   
-//	   System.out.println(urlVal.isValid("http://www.amazon.com/" + tooLong));
-	   
-	   
-	   
-	   Integer intTest = 1;
-	   System.out.println(urlVal.isValid("http://www.amazon.com/" + intTest));
-	   Boolean boolTest = true;
-	   System.out.println(urlVal.isValid("http://www.amazon.com/" + boolTest));	 
-	   Double floatTest = 1.0;
-	   System.out.println(urlVal.isValid("http://www.amazon.com/" + floatTest));
-	   Character charTest = 'a';
-	   System.out.println(urlVal.isValid("http://www.amazon.com/" + charTest));
-	   
-	   
-	   
-	   /* VALID QUERY TESTS */
-	   System.out.println("VALID QUERY PATHS");
-	   
-	   System.out.println(urlVal.isValid("http://www.amazon.com/test?action=view"));
+//	   /* MANUAL TEST PATHS */
+//	   System.out.println("INVALID TEST PATHS");
+//	   
+//	   /* EXPECTED RESULT: FAIL */
+//	   System.out.println(urlVal.isValid("http://www.amazon.com/\\"));
+//	   System.out.println(urlVal.isValid("http://www.amazon.com["));
+//	   System.out.println(urlVal.isValid("http://www.amazon.com/]"));
+//	   
+//	   /* NOT SURE WHY '//' RETURNS FALSE */
+//	   System.out.println(urlVal.isValid("http://www.amazon.com//"));
+//	   System.out.println(urlVal.isValid("http://www.amazon.com/(("));
+//	   System.out.println(urlVal.isValid("http://www.amazon.com/~~"));
+//	   
+//	   
+////	   String tooLong = null;
+////	   for (int i = 0; i < Integer.MAX_VALUE; i++) {
+////		   tooLong += "a";
+////	   }
+////	   
+////	   
+////	   System.out.println(urlVal.isValid("http://www.amazon.com/" + tooLong));
+//	   
+//	   
+//	   
+//	   Integer intTest = 1;
+//	   System.out.println(urlVal.isValid("http://www.amazon.com/" + intTest));
+//	   Boolean boolTest = true;
+//	   System.out.println(urlVal.isValid("http://www.amazon.com/" + boolTest));	 
+//	   Double floatTest = 1.0;
+//	   System.out.println(urlVal.isValid("http://www.amazon.com/" + floatTest));
+//	   Character charTest = 'a';
+//	   System.out.println(urlVal.isValid("http://www.amazon.com/" + charTest));
+//	   
+//	   
+//	   
+//	   /* VALID QUERY TESTS */
+//	   System.out.println("VALID QUERY PATHS");
+//	   
+//	   System.out.println(urlVal.isValid("http://www.amazon.com/test?action=view"));
    }
    
    /*test schemes partitioned by beginning valid letters [a,z], [A,Z], invalid chars above and below these values, ending valid numbers [0,9], letters [a,z], [A,Z],
@@ -259,7 +283,7 @@ public class UrlValidatorTest extends TestCase {
    }
    
    //Test authorities in the IPv4 format [0.0.0.0, 255.255.255.255] and reg-name host name format: dot delimited [a,z] [0,9], - https://en.wikipedia.org/wiki/Hostname
-   public void testAuthorityPartitions()
+   public void testPathPartitions()
    {
 	   UrlValidator urlVal = new UrlValidator(null, null, UrlValidator.ALLOW_ALL_SCHEMES);
 	   //valid IPv4 addresses range [0.0.0.0, 255.255.255.255]
@@ -323,6 +347,15 @@ public class UrlValidatorTest extends TestCase {
    public void testIsValid()
    {
 	   UrlValidator urlVal = new UrlValidator(null, null, UrlValidator.ALLOW_ALL_SCHEMES);
+	   
+	   
+	   ResultPair validScheme = new ResultPair("http://", true);
+	   ResultPair validAuthority = new ResultPair("0.0.0.0", true);
+	   ResultPair validPort = new ResultPair("6", true);
+	   ResultPair validPath = new ResultPair("", true);
+	   ResultPair validQuery = new ResultPair("", true);
+	   
+	   
 	   ResultPair[] testSchemes = {
 			   new ResultPair("", true), 
 			   new ResultPair("x://", true), 
@@ -388,31 +421,408 @@ public class UrlValidatorTest extends TestCase {
 			   new ResultPair("123382", false)
 			   };
 	   
-	   ResultPair[] testPaths = {new ResultPair("", true)};
+	   ResultPair[] testPaths = {
+			   new ResultPair("", true),
+			   new ResultPair("/test", true),
+			   new ResultPair("/", true),
+			   new ResultPair("/1", true),
+			   new ResultPair("/@", true),
+			   new ResultPair("/&", true),
+			   new ResultPair("/?", true),
+			   new ResultPair("/=", true),
+			   new ResultPair("/+", true),
+			   new ResultPair("/,", true),
+			   new ResultPair("/.", true),
+			   new ResultPair("/!", true),
+			   new ResultPair("/~", true),
+			   new ResultPair("/*", true),
+			   new ResultPair("/'", true),
+			   new ResultPair("/%", true),
+			   new ResultPair("/$", true),
+			   new ResultPair("/_", true),
+			   new ResultPair("/;", true),
+			   new ResultPair("/(", true),
+			   new ResultPair("/)", true),
+			   new ResultPair("/test/", true),
+			   new ResultPair("\\", false),
+			   new ResultPair("/[", false),
+			   new ResultPair("/]", false),
+			   new ResultPair("//", false),
+			   new ResultPair("/((", false),
+			   new ResultPair("/~~", false),
+			   };
 	   
-	   ResultPair[] testQueries = {new ResultPair("", true)};
+	   ResultPair[] testQueries = {
+			   new ResultPair("", true),
+			   new ResultPair("?action=view", true),
+			   new ResultPair("?", true),
+			   new ResultPair("?test", true),
+			   new ResultPair("?action=view&more=test", true),
+			   new ResultPair("test", false),
+			   };
+	   
+
+//	   /* VALID QUERY TESTS */
+//	   System.out.println("VALID QUERY PATHS");
+//	   
+//	   System.out.println(urlVal.isValid("http://www.amazon.com/test?action=view"));
+	   
+	   /* CREATE SETS TO CONTAIN FAILING RESULT PAIRS, 
+	    * WHICH WILL HELP WITH TESTING ANALYSIS
+	    */
+	   
 	   int passed = 0, failed = 0;
+	   int testCaseIndex = 0;
+	   List<TestCase> testSuite = new ArrayList<TestCase>();
+	   
 	   for(int i = 0; i < testSchemes.length; i++) {
 		   for(int j = 0; j < testAuthorities.length; j++) {
 			   for(int k = 0; k < testPorts.length; k++) {
 				   for(int l = 0; l < testPaths.length; l++) {
 					   for(int m = 0; m < testQueries.length; m++) {
+						   
+						   /* CREATE NEW TEST CASE OBJECT */
+						   ResultPair[] resultPairs = {
+								   testSchemes[i],
+								   testAuthorities[j],
+								   testPorts[k],
+								   testPaths[l],
+								   testQueries[m]
+						   };
+						   TestCase testcase = new TestCase(testCaseIndex, resultPairs);
+						   
+						   /* PERFORM TEST */
 						   Boolean expected = testSchemes[i].valid && testAuthorities[j].valid && testPorts[k].valid && testPaths[l].valid && testQueries[m].valid;
-						   System.out.println("Testing: " + testSchemes[i].item + testAuthorities[j].item + testPorts[k].item + testPaths[l].item + testQueries[m].item);
+						   // System.out.println("Testing: " + testSchemes[i].item + testAuthorities[j].item + testPorts[k].item + testPaths[l].item + testQueries[m].item);
 						   boolean result = expected == urlVal.isValid(testSchemes[i].item + testAuthorities[j].item + testPorts[k].item + testPaths[l].item + testQueries[m].item);
+						   testcase.totalPass = result;
 						   if(result) {
 							   passed++;
 						   }else {
 							   failed++;
+							   
+							   /* TEST EACH FRAGMENT AGAINST CONTROL, RECORD ANY INDEPENDENT FAILURES */
+							   
+							   /* SCHEME */
+							   expected = testSchemes[i].valid && validAuthority.valid && validPort.valid && validPath.valid && validQuery.valid;
+							   testcase.schemePass = expected == urlVal.isValid(testSchemes[i].item + validAuthority.item + validPort.item + validPath.item + validQuery.item);
+							   
+							   /* AUTHORITY */
+							   expected = validScheme.valid && testAuthorities[j].valid && validPort.valid && validPath.valid && validQuery.valid;
+							   testcase.authorityPass = expected == urlVal.isValid(validScheme.item + testAuthorities[j].item + validPort.item + validPath.item + validQuery.item);
+							   
+							   /* PORT */
+							   expected = validScheme.valid && validAuthority.valid && testPorts[k].valid && validPath.valid && validQuery.valid;
+							   testcase.portPass = expected == urlVal.isValid(validScheme.item + validAuthority.item + testPorts[k].item + validPath.item + validQuery.item);
+							   
+							   /* PATH */
+							   expected = validScheme.valid && validAuthority.valid && validPort.valid && testPaths[l].valid && validQuery.valid;
+							   testcase.pathPass = expected == urlVal.isValid(validScheme.item + validAuthority.item + validPort.item + testPaths[l].item + validQuery.item);
+							   
+							   /* QUERY */
+							   expected = validScheme.valid && validAuthority.valid && validPort.valid && validPath.valid && testQueries[m].valid;
+							   testcase.queryPass = expected == urlVal.isValid(validScheme.item + validAuthority.item + validPort.item + validPath.item + testQueries[m].item);
+							   
 						   }
-						   System.out.println(result);
+						   
+						   testSuite.add(testcase);
+						   testCaseIndex++;
+						   // System.out.println(result);
 						   
 					   }
 				   }
 			   }
 		   }
 	   }
-	   System.out.println("Failed = " + failed + "\nPassed = " + passed);
+	   System.out.println("Total Failed = " + failed + "\nTotal Passed = " + passed + "\n");
+	   
+	   
+	   int totalAuthorityFailures = 0;
+	   int totalSchemeFailures = 0;
+	   int totalPortFailures = 0;
+	   int totalPathFailures = 0;
+	   int totalQueryFailures = 0;
+
+	   
+	   for (int i = 0; i < testSuite.size(); i++) {
+		   if (!testSuite.get(i).schemePass) {
+			   totalSchemeFailures++;
+		   }
+		   if (!testSuite.get(i).authorityPass) {
+			   totalAuthorityFailures++;
+		   }
+		   if (!testSuite.get(i).portPass) {
+			   totalPortFailures++;
+		   }
+		   if (!testSuite.get(i).pathPass) {
+			   totalPathFailures++;
+		   }
+		   if (!testSuite.get(i).queryPass) {
+			   totalQueryFailures++;
+		   }
+	   }
+	   
+	   System.out.println("SCHEME FAILURES:");	
+	   System.out.println(totalSchemeFailures + "\n");
+	   
+	   System.out.println("AUTHORITY FAILURES:");	   
+	   System.out.println(totalAuthorityFailures + "\n");
+	   
+	   System.out.println("PORT FAILURES:");	   
+	   System.out.println(totalPortFailures + "\n");
+	   
+	   System.out.println("PATH FAILURES:");	   
+	   System.out.println(totalPathFailures + "\n");
+	   
+	   System.out.println("Query FAILURES:");	   
+	   System.out.println(totalQueryFailures + "\n");
+	   
+	   
+	   
+	  
+	   
+	  
+	   /* CREATE SETS */
+	   Set<ResultPair> failedAuthorityTestCases = new HashSet<ResultPair>();
+	   Set<ResultPair> passedAuthorityTestCases = new HashSet<ResultPair>();
+	   
+	   Set<ResultPair> failedSchemeTestCases = new HashSet<ResultPair>();
+	   Set<ResultPair> passedSchemeTestCases = new HashSet<ResultPair>();
+	   
+	   Set<ResultPair> failedPortTestCases = new HashSet<ResultPair>();
+	   Set<ResultPair> passedPortTestCases = new HashSet<ResultPair>();
+	   
+	   Set<ResultPair> failedPathTestCases = new HashSet<ResultPair>();
+	   Set<ResultPair> passedPathTestCases = new HashSet<ResultPair>();
+	   
+	   Set<ResultPair> failedQueryTestCases = new HashSet<ResultPair>();
+	   Set<ResultPair> passedQueryTestCases = new HashSet<ResultPair>();
+	   
+	   
+	   for (int i = 0; i < testSuite.size(); i++) {
+		   if (testSuite.get(i).totalPass) {
+			   passedSchemeTestCases.add(testSuite.get(i).resultPairs[0]);
+			   passedAuthorityTestCases.add(testSuite.get(i).resultPairs[1]);
+			   passedPortTestCases.add(testSuite.get(i).resultPairs[2]);
+			   passedPathTestCases.add(testSuite.get(i).resultPairs[3]);
+			   passedQueryTestCases.add(testSuite.get(i).resultPairs[4]);
+		   }
+		   else {
+			   if (!testSuite.get(i).schemePass) {
+				   failedSchemeTestCases.add(testSuite.get(i).resultPairs[0]);
+			   }
+			   if (!testSuite.get(i).authorityPass) {
+				   failedAuthorityTestCases.add(testSuite.get(i).resultPairs[1]);
+			   }
+			   if (!testSuite.get(i).portPass) {
+				   failedPortTestCases.add(testSuite.get(i).resultPairs[2]);
+			   }
+			   if (!testSuite.get(i).pathPass) {
+				   failedPathTestCases.add(testSuite.get(i).resultPairs[3]);
+			   }
+			   if (!testSuite.get(i).queryPass) {
+				   failedQueryTestCases.add(testSuite.get(i).resultPairs[4]);
+			   }
+		   }
+	   }
+	   
+	   /* SCHEME TEST SUITE ANALYSIS */
+	   System.out.println("SCHEMES");
+	   for (int i = 0; i < testSuite.size(); i++) {
+		   if (testSuite.get(i).totalPass) {
+			   passedSchemeTestCases.add(testSuite.get(i).resultPairs[0]);
+		   }
+		   else {
+			   if (!testSuite.get(i).schemePass) {
+				   failedSchemeTestCases.add(testSuite.get(i).resultPairs[0]);
+			   }
+		   }
+	   }
+	   
+	   
+	   Set<ResultPair> intersectionSchemeTestCases = new HashSet<ResultPair>(failedSchemeTestCases);
+	   intersectionSchemeTestCases.retainAll(passedPathTestCases);
+	   
+	   System.out.println("\n\tINTERSECTION OF PASSED/FAILED SCHEMES");
+	   for (ResultPair pair : intersectionSchemeTestCases) {
+		   System.out.println("\t\t" + pair.item);
+	   }
+	   
+	   Set<ResultPair> purePassSchemeTestCases = new HashSet<ResultPair>(passedSchemeTestCases);
+	   purePassSchemeTestCases.removeAll(failedSchemeTestCases);
+	   
+	   System.out.println("\n\tALWAYS PASS SCHEMES");
+	   for (ResultPair pair : purePassSchemeTestCases) {
+		   System.out.println("\t\t" + pair.item);
+	   }
+	   
+	   
+	   Set<ResultPair> pureFailSchemeTestCases = new HashSet<ResultPair>(failedSchemeTestCases);
+	   pureFailSchemeTestCases.removeAll(passedSchemeTestCases);
+	   
+	   System.out.println("\n\tALWAYS FAIL SCHEMES");
+	   for (ResultPair pair : pureFailSchemeTestCases) {
+		   System.out.println("\t\t" + pair.item);
+	   }
+	   
+	   
+	   /* AUTHORITY TEST SUITE ANALYSIS */
+	   System.out.println("AUTHORITIES");
+	   
+	   for (int i = 0; i < testSuite.size(); i++) {
+		   if (testSuite.get(i).totalPass) {
+			   passedAuthorityTestCases.add(testSuite.get(i).resultPairs[1]);
+		   }
+		   else {
+			   if (!testSuite.get(i).authorityPass) {
+				   failedAuthorityTestCases.add(testSuite.get(i).resultPairs[1]);
+			   }
+		   }
+	   }
+	   
+	   Set<ResultPair> intersectionAuthorityTestCases = new HashSet<ResultPair>(failedAuthorityTestCases);
+	   intersectionAuthorityTestCases.retainAll(passedAuthorityTestCases);
+	   
+	   System.out.println("\n\tINTERSECTION OF PASSED/FAILED AUTHORITIES");
+	   for (ResultPair pair : intersectionAuthorityTestCases) {
+		   System.out.println("\t\t" + pair.item);
+	   }
+	   
+	   Set<ResultPair> purePassAuthorityTestCases = new HashSet<ResultPair>(passedAuthorityTestCases);
+	   purePassAuthorityTestCases.removeAll(failedAuthorityTestCases);
+	   
+	   System.out.println("\n\tALWAYS PASS AUTHORITIES");
+	   for (ResultPair pair : purePassAuthorityTestCases) {
+		   System.out.println("\t\t" + pair.item);
+	   }
+	   
+	   
+	   Set<ResultPair> pureFailAuthorityTestCases = new HashSet<ResultPair>(failedAuthorityTestCases);
+	   pureFailAuthorityTestCases.removeAll(passedAuthorityTestCases);
+	   
+	   System.out.println("\n\tALWAYS FAIL AUTHORITIES");
+	   for (ResultPair pair : pureFailAuthorityTestCases) {
+		   System.out.println("\t\t" + pair.item);
+	   }
+	   
+	   
+	   /* PORT TEST SUITE ANALYSIS */
+	   System.out.println("PORTS");
+	   for (int i = 0; i < testSuite.size(); i++) {
+		   if (testSuite.get(i).totalPass) {
+			   passedPortTestCases.add(testSuite.get(i).resultPairs[2]);
+		   }
+		   else {
+			   if (!testSuite.get(i).portPass) {
+				   failedPortTestCases.add(testSuite.get(i).resultPairs[2]);
+			   }
+		   }
+	   }
+	   
+	   Set<ResultPair> intersectionPortTestCases = new HashSet<ResultPair>(failedPortTestCases);
+	   intersectionPortTestCases.retainAll(passedPortTestCases);
+	   
+	   System.out.println("\n\tINTERSECTION OF PASSED/FAILED PORTS");
+	   for (ResultPair pair : intersectionPortTestCases) {
+		   System.out.println("\t\t" + pair.item);
+	   }
+	   
+	   Set<ResultPair> purePassPortTestCases = new HashSet<ResultPair>(passedPortTestCases);
+	   purePassPortTestCases.removeAll(failedPortTestCases);
+	   
+	   System.out.println("\n\tALWAYS PASS PORTS");
+	   for (ResultPair pair : purePassPortTestCases) {
+		   System.out.println("\t\t" + pair.item);
+	   }
+	   
+	   
+	   Set<ResultPair> pureFailPortTestCases = new HashSet<ResultPair>(failedPortTestCases);
+	   pureFailPortTestCases.removeAll(passedPortTestCases);
+	   
+	   System.out.println("\n\tALWAYS FAIL PORTS");
+	   for (ResultPair pair : pureFailPortTestCases) {
+		   System.out.println("\t\t" + pair.item);
+	   }
+	   
+	   
+	   /* PATH TEST SUITE ANALYSIS */
+	   System.out.println("PATHS");
+	   for (int i = 0; i < testSuite.size(); i++) {
+		   if (testSuite.get(i).totalPass) {
+			   passedPathTestCases.add(testSuite.get(i).resultPairs[3]);
+		   }
+		   else {
+			   if (!testSuite.get(i).pathPass) {
+				   failedPathTestCases.add(testSuite.get(i).resultPairs[3]);
+			   }
+		   }
+	   }
+	   
+	   Set<ResultPair> intersectionPathTestCases = new HashSet<ResultPair>(failedPathTestCases);
+	   intersectionPathTestCases.retainAll(passedPathTestCases);
+	   
+	   System.out.println("\n\tINTERSECTION OF PASSED/FAILED PATHS");
+	   for (ResultPair pair : intersectionPathTestCases) {
+		   System.out.println("\t\t" + pair.item);
+	   }
+	   
+	   Set<ResultPair> purePassPathTestCases = new HashSet<ResultPair>(passedPathTestCases);
+	   purePassPathTestCases.removeAll(failedPathTestCases);
+	   
+	   System.out.println("\n\tALWAYS PASS PATHS");
+	   for (ResultPair pair : purePassPathTestCases) {
+		   System.out.println("\t\t" + pair.item);
+	   }
+	   
+	   
+	   Set<ResultPair> pureFailPathTestCases = new HashSet<ResultPair>(failedPathTestCases);
+	   pureFailPathTestCases.removeAll(passedPathTestCases);
+	   
+	   System.out.println("\n\tALWAYS FAIL PATHS");
+	   for (ResultPair pair : pureFailPathTestCases) {
+		   System.out.println("\t\t" + pair.item);
+	   }
+	   
+	   
+	   /* QUERY TEST SUITE ANALYSIS */
+	   System.out.println("QUERIES");
+	   for (int i = 0; i < testSuite.size(); i++) {
+		   if (testSuite.get(i).totalPass) {
+			   passedQueryTestCases.add(testSuite.get(i).resultPairs[4]);
+		   }
+		   else {
+			   if (!testSuite.get(i).queryPass) {
+				   failedQueryTestCases.add(testSuite.get(i).resultPairs[4]);
+			   }
+		   }
+	   }
+	   
+	   Set<ResultPair> intersectionQueryTestCases = new HashSet<ResultPair>(failedQueryTestCases);
+	   intersectionQueryTestCases.retainAll(passedQueryTestCases);
+	   
+	   System.out.println("\n\tINTERSECTION OF PASSED/FAILED QUERIES");
+	   for (ResultPair pair : intersectionQueryTestCases) {
+		   System.out.println("\t\t" + pair.item);
+	   }
+	   
+	   Set<ResultPair> purePassQueryTestCases = new HashSet<ResultPair>(passedQueryTestCases);
+	   purePassQueryTestCases.removeAll(failedQueryTestCases);
+	   
+	   System.out.println("\n\tALWAYS PASS QUERIES");
+	   for (ResultPair pair : purePassQueryTestCases) {
+		   System.out.println("\t\t" + pair.item);
+	   }
+	   
+	   
+	   Set<ResultPair> pureFailQueryTestCases = new HashSet<ResultPair>(failedQueryTestCases);
+	   pureFailQueryTestCases.removeAll(passedQueryTestCases);
+	   
+	   System.out.println("\n\tALWAYS FAIL QUERIES");
+	   for (ResultPair pair : pureFailQueryTestCases) {
+		   System.out.println("\t\t" + pair.item);
+	   }
+	   
+	   
    }
    
    public void testAnyOtherUnitTest()
