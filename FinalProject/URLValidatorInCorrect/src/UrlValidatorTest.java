@@ -222,7 +222,128 @@ public class UrlValidatorTest extends TestCase {
    public void testYourSecondPartition(){
 	   
    }
+   //Test authorities in the IPv4 format [0.0.0.0, 255.255.255.255] and reg-name host name format: dot delimited [a,z] [0,9], - https://en.wikipedia.org/wiki/Hostname
+   public void testAuthorityPartitions()
+   {
+	   UrlValidator urlVal = new UrlValidator(null, null, UrlValidator.ALLOW_ALL_SCHEMES);
+	   //valid IPv4 addresses range [0.0.0.0, 255.255.255.255]
+	   assertTrue("Otherwise valid address with min valid IPv4 host name should be valid", urlVal.isValid("http://0.0.0.0"));
+	   assertTrue("Otherwise valid address with max valid IPv4 host name should be valid", urlVal.isValid("http://255.255.255.255"));
+	   //invalid IPv4 addresses range [INT_MIN.INT_MIN.INT_MIN.INT_MIN, 0.0.0.-1]
+	   assertFalse("Otherwise valid address with min negative invalid IPv4 host name should be invalid", 
+			   urlVal.isValid("http://" + (int)Integer.MIN_VALUE + (int)Integer.MIN_VALUE + (int)Integer.MIN_VALUE + (int)Integer.MIN_VALUE));
+	   assertFalse("Otherwise valid address with max negative invalid IPv4 host name should be invalid", urlVal.isValid("http://0.0.0.-1"));
+	   //invalid IPv4 addresses range [255.255.255.256, INT_MAX.INT_MAX.INT_MAX.INT_MAX]
+	   assertFalse("Otherwise valid address with min postive invalid IPv4 host name should be invalid", urlVal.isValid("http://255.255.255.256"));
+	   assertFalse("Otherwise valid address with max positive invalid IPv4 host name should be invalid", 
+			   urlVal.isValid("http://" + (int)Integer.MAX_VALUE + (int)Integer.MAX_VALUE + (int)Integer.MAX_VALUE + (int)Integer.MAX_VALUE));
+	   //min and max lowercase letter and number reg-names
+	   assertTrue("Otherwise valid address with valid min lowercase0 (a) reg-name should be valid", urlVal.isValid("http://a"));
+	   assertTrue("Otherwise valid address with valid max lowercase (z) reg-name should be valid", urlVal.isValid("http://z"));
+	   assertTrue("Otherwise valid address with valid min number (0) reg-name should be valid", urlVal.isValid("http://0"));
+	   assertTrue("Otherwise valid address with valid max number (9) reg-name should be valid", urlVal.isValid("http://9"));
+	   //min and max reg-name lengths [1,253]
+	   assertTrue("Otherwise valid address with min length (1) reg-name should be valid", urlVal.isValid("http://1"));
+	   String s = "http://";
+	   for(int i = 0; i < 11; i++) {
+		  for(int j = 0; j < 22; j++) {
+			  s += "a";
+		  }
+		  s += ".";
+	   }
+	   assertTrue("Otherwise valid address with max length (253) reg-name should be valid", urlVal.isValid(s));
+	   //invalid length reg-names
+	   assertFalse("Otherwise valid address with min invalid positive length (254) reg-name should be invalid", urlVal.isValid(s + "a"));
+	   assertFalse("Otherwise valid address with 0 length reg-name should be invalid", urlVal.isValid("http://"));
+	   //test valid and invalid positions for '-'
+	   assertTrue("Otherwise valid address with '-' in between numbers or letters in a label of a reg-name should be valid", urlVal.isValid("http://a.a-3.c"));
+	   assertFalse("Otherwise valid address with '-' beginning a label of a reg-name should be invalid", urlVal.isValid("http://-a"));
+	   assertFalse("Otherwise valid address with '-' ending a label of a reg-name should be invalid", urlVal.isValid("http://a-"));
+
+   }
    
+   //Valid ports in the range 0-65535 - https://en.wikipedia.org/wiki/Port_(computer_networking) tested with three partitions: [INT_MIN, -1], [0,65535], [65536, INT_MAX]
+   public void testPortPartitions()
+   {
+	   UrlValidator urlVal = new UrlValidator(null, null, UrlValidator.ALLOW_ALL_SCHEMES);
+	   //sample base valid address
+	   assertTrue("Sample base valid address http://www.google.com should be valid.", urlVal.isValid("http://www.google.com"));
+	   //min and max values in valid range [0, 65535]
+	   assertTrue("Otherwise valid address with a minimum valid port number (0) should be valid", urlVal.isValid("http://www.google.com:0"));
+	   assertTrue("Otherwise valid address with a maximum valid port number (65535) should be valid", urlVal.isValid("http://www.google.com:65535"));
+	   //min and max values in negative range [INT_MIN, -1]
+	   assertFalse("Otherwise valid address with a minimum invalid negative port number (INT_MIN) should be invalid",
+		urlVal.isValid("http://www.google.com:" + (int)Integer.MIN_VALUE));
+	   assertFalse("Otherwise valid address with a maximum invalid negative port number (-1) should be invalid", urlVal.isValid("http://www.google.com:-1"));
+	   //min and max values in positive range [65536, INT_MAX]
+	   assertFalse("Otherwise valid address with a minimum invalid positive port number (65536) should be invalid", urlVal.isValid("http://www.google.com:65536"));
+	   assertFalse("Otherwise valid address with a maximum invalid positive port number (INT_MAX) should be invalid", 
+		urlVal.isValid("http://www.google.com:" + (int)Integer.MAX_VALUE));
+
+   }
+   ResultPair[] testSchemes = {
+			   new ResultPair("", true), 
+			   new ResultPair("x://", true), 
+			   new ResultPair("Y://", true), 
+			   new ResultPair("5://", false), 
+			   new ResultPair("A0://", true), 
+			   new ResultPair("c4://", true), 
+			   new ResultPair("C+://", true), 
+			   new ResultPair("r-://", true), 
+			   new ResultPair("o.://", true), 
+			   new ResultPair("1q://", false), 
+			   new ResultPair("2H://", false), 
+			   new ResultPair("3+://", false), 
+			   new ResultPair("4-://", false), 
+			   new ResultPair("9.://", false),
+			   new ResultPair("gG://", true), 
+			   new ResultPair("Rr://", true), 
+			   new ResultPair("oO.://", true), 
+			   new ResultPair("Yy+://", true), 
+			   new ResultPair("DdD-://", true),
+			   new ResultPair("Y12a+://", true), 
+			   new ResultPair("o1j-://", true), 
+			   new ResultPair("R5.://", true)
+			   };
+	   String maxAuth = "";
+	   for(int i = 0; i < 10; i++){
+		   maxAuth += "abcdEFGH104abcdEFGH104.";
+	   }
+	   ResultPair[] testAuthorities = {
+			   new ResultPair("0.0.0.0", true), 
+			   new ResultPair("255.255.255.255", true), 
+			   new ResultPair("255.255.255.256", false), 
+			   new ResultPair("0.0.0.-1", false), 
+			   new ResultPair("0.0.0.0", true), 
+			   new ResultPair("b", true), 
+			   new ResultPair("R", true), 
+			   new ResultPair("6", true),
+			   new ResultPair(maxAuth, true),
+			   new ResultPair(maxAuth + "4", false),
+			   new ResultPair("R-", true),
+			   new ResultPair("-R", false),
+			   new ResultPair("c.", true), 
+			   new ResultPair(".c", false),
+			   new ResultPair("3.A.b", true),
+			   new ResultPair("e.F.0", true),
+			   new ResultPair("A-9.r", true),
+			   new ResultPair("A..r", false),
+			   new ResultPair("e..6", false),
+			   };
+	   
+	   ResultPair[] testPorts = {
+			   new ResultPair("6", true),
+			   new ResultPair("50", true),
+			   new ResultPair("1284", true),
+			   new ResultPair("61249", true),
+			   new ResultPair("-3", false),
+			   new ResultPair("-89", false),
+			   new ResultPair("-3463", false),
+			   new ResultPair("-10826", false),
+			   new ResultPair("-83378", false),
+			   new ResultPair("69123", false),
+			   new ResultPair("123382", false)
+			   };
    
    public void testIsValid()
    {
