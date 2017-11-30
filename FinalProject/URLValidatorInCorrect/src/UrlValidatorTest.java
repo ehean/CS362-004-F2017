@@ -60,6 +60,10 @@ public class UrlValidatorTest extends TestCase {
       super(testName);
    }
 
+	//method for asserting the expression actual is equal to the expected expression, printing out the test and whether or not it actually evaluates to true or false
+   public void myAssert(String test, Boolean expected, Boolean actual) {
+	System.out.println("Testing \"isValid(" + test + ")\" is equal to expected: " + expected + "\n" + "actual: " + actual);
+   }
    
    
    public void testManualTest()
@@ -135,35 +139,50 @@ public class UrlValidatorTest extends TestCase {
 //	   System.out.println(urlVal.isValid("http://www.amazon.com;0"));
 //	   System.out.println(urlVal.isValid("http://www.amazon.com:09348248"));
 //	   
-//	   /*Test Paths*/
-//	   //void path
-//	   assertTrue("An otherwise valid URL with a void path should be valid.", urlVal.isValid("http://www.google.com:80"));
-//	   //single valid xpalphas paths
-//	   assertTrue("An otherwise valid URL with a single '+' path should be valid.", urlVal.isValid("http://www.google.com:80/+"));
-//	   assertTrue("An otherwise valid URL with a single alpha 'a' path should be valid.", urlVal.isValid("http://www.google.com:80/a"));
-//	   assertTrue("An otherwise valid URL with a single digit '0' path should be valid.", urlVal.isValid("http://www.google.com:80/0"));
-//	   assertTrue("An otherwise valid URL with a single safe '$' path should be valid.", urlVal.isValid("http://www.google.com:80/$"));
-//	   assertTrue("An otherwise valid URL with a single extra '!' path should be valid.", urlVal.isValid("http://www.google.com:80/!"));
-//	   assertTrue("An otherwise valid URL with a single escape '%aa' path should be valid.", urlVal.isValid("http://www.google.com:80/%aa"));
-//	   //multiple xpalphas path delimited by forward slashes
-//	   assertTrue("An otherwise valid URL with xpalphas/xpalphas/ path should be valid.", urlVal.isValid("http://www.google.com:80/+a0$!%aa/+a0$!%aa/+a0$!%aa/"));
-//	   //single invalid char paths
-//	   assertFalse("An otherwise valid URL with a single reserved character '?' path should be invalid.", urlVal.isValid("http://www.google.com:80/?"));
-//	   assertFalse("An otherwise valid URL with a single national character '{' path should be invalid.", urlVal.isValid("http://www.google.com:80/{"));
-//	   assertFalse("An otherwise valid URL with a single punctuation character '<' path should be invalid.", urlVal.isValid("http://www.google.com:80/<"));
-//	   //multiple invalid character paths delimited by forward slashes
-//	   assertFalse("An otherwise valid URL with /invalidChars/invalidChars/ path should be invalid.", urlVal.isValid("http://www.google.com:80/?{</?{</?{</?{</"));
-//	   //one valid character and one invalid character
-//	   assertFalse("An otherwise valid URL with invalidChar+xpalphas path should be invalid.", urlVal.isValid("http://www.google.com:80/{a"));
-//	   //mixing of invalid characters and invalid character paths delimited by forward slashes
-//	   assertFalse("An otherwise valid URL with /invalidChars+validChars/invalidChars+validChars/ path should be invalid.", urlVal.isValid("http://www.google.com:80/+a0$!%aa?{</+a0$!%aa?{</"));
-//	   /*Test Queries*/
-//	   //void query
-//	   assertTrue("An otherwise valid URL with a void query should be valid.", urlVal.isValid("http://www.google.com:80/"));
-//	   //? query
-//	   assertTrue("An otherwise valid URL with a query beginning with '?' to the end of the URL with no '#' should be valid.", urlVal.isValid("http://www.google.com:80/?a1+}{!@$%&^*"));
-//	   //?##
-//	   assertFalse("An otherwise valid URL with a query ending in'##' should be invalid as '#' starts a fragment and '#' is not a valid fragment.", urlVal.isValid("http://www.google.com:80/?##"));
+//	  /*Test Paths*/
+	   //void path
+	   System.out.println("\nMANUAL TESTING PATHS");
+	   String test = "http://google.com:80";
+	   myAssert(test, true, urlVal.isValid(test));
+	   //single valid xpalphas paths
+	   test = "http://www.google.com:80/+";
+	   myAssert(test, true, urlVal.isValid(test));
+	   test = "http://www.google.com:80/a";
+	   myAssert(test, true, urlVal.isValid(test));
+	   test = "http://www.google.com:80/0";
+	   myAssert(test, true, urlVal.isValid(test));
+	   test = "http://www.google.com:80/$";
+	   myAssert(test, true, urlVal.isValid(test));
+	   test = "http://www.google.com:80/!";
+	   myAssert(test, true, urlVal.isValid(test));
+	   test = "http://www.google.com:80/%aa";
+	   myAssert(test, true, urlVal.isValid(test));
+	   //multiple xpalphas path delimited by forward slashes
+	   test = "http://www.google.com:80/+a0$!%aa/+a0$!%aa/+a0$!%aa/";
+	   myAssert(test, true, urlVal.isValid(test));
+	   //single invalid char paths
+	   test = "http://www.google.com:80/{";
+	   myAssert(test, false, urlVal.isValid(test));
+	   test = "http://www.google.com:80/<";
+	   myAssert(test, false, urlVal.isValid(test));
+	   //multiple invalid character paths delimited by forward slashes
+	   test = "http://www.google.com:80/{</?{</?{</?{</";
+	   myAssert(test, false, urlVal.isValid(test));
+	   //one valid character and one invalid character
+	   test = "http://www.google.com:80/{a";
+	   myAssert(test, false, urlVal.isValid(test));
+	   //mixing of invalid characters and invalid character paths delimited by forward slashes
+	   test = "http://www.google.com:80/+a0$!%aa?{</+a0$!%aa?{</";
+	   myAssert(test, false, urlVal.isValid(test));
+
+	   /*Test Queries*/
+	   System.out.println("\nMANUAL TESTING QUERIES");
+	   //void query
+	   test = "http://www.google.com:80/";
+	   myAssert(test, true, urlVal.isValid(test));
+	   //? query
+	   test = "http://www.google.com:80/?a1+}{!@$%&^*";
+	   myAssert(test, true, urlVal.isValid(test));
    }
    
    public void testYourFirstPartition()
@@ -245,101 +264,144 @@ public class UrlValidatorTest extends TestCase {
    invalid chars above and below these values, ., +, and - */
    public void testSchemePartitions()
    {
+	   System.out.println("\nTESTING SCHEME PARTITIONS");
 	   UrlValidator urlVal = new UrlValidator(null, null, UrlValidator.ALLOW_ALL_SCHEMES);
 	   //schemes beginning with min and max valid lowercase letters a,z
-	   assertTrue("Otherwise valid url beginning with minimum valid lowercase letter (a) should be valid", urlVal.isValid("a://www.google.com"));
-	   assertTrue("Otherwise valid url beginning with maximum valid lowercase letter (z) should be valid", urlVal.isValid("z://www.google.com"));
+	   String test = "a://www.google.com";
+	   myAssert(test, true, urlVal.isValid(test));
+	   test = "z://www.google.com";
+	   myAssert(test, true, urlVal.isValid(test));
 	   //schemes beginning with ASCII chars above and below min and max valid lowercase letters a,z
-	   assertFalse("Otherwise valid url beginning with maximum invalid ASCII char below lowercase range (`) should be invalid", urlVal.isValid("`://www.google.com"));
-	   assertFalse("Otherwise valid url beginning with minimum invalid ASCII char above lowercase range ({) should be invalid", urlVal.isValid("{://www.google.com"));
+	   test = "`://www.google.com";
+	   myAssert(test, false, urlVal.isValid(test));
+	   test = "{://www.google.com";
+	   myAssert(test, false, urlVal.isValid(test));
 	   //schemes beginning with min and max valid uppercase letters A,Z
-	   assertTrue("Otherwise valid url beginning with minimum valid uppercase letter (A) should be valid", urlVal.isValid("A://www.google.com"));
-	   assertTrue("Otherwise valid url beginning with maximum valid uppercase letter (Z) should be valid", urlVal.isValid("Z://www.google.com"));
+	   test = "A://www.google.com";
+	   myAssert(test, true, urlVal.isValid(test));
+	   test = "Z://www.google.com";
+	   myAssert(test, true, urlVal.isValid(test));
 	   //schemes beginning with ASCII chars above and below min and max valid uppercase letters A,Z
-	   assertFalse("Otherwise valid url beginning with maximum invalid ASCII char below uppercase range (@) should be invalid", urlVal.isValid("@://www.google.com"));
-	   assertFalse("Otherwise valid url beginning with minimum invalid ASCII char above uppercase range ([) should be invalid", urlVal.isValid("[://www.google.com"));
-	   //schemes ending with min and max valid numbers 0,9
-	   assertTrue("Otherwise valid url ending with minimum valid number (0) should be valid", urlVal.isValid("a0://www.google.com"));
-	   assertTrue("Otherwise valid url ending with maximum valid number (9) should be valid", urlVal.isValid("a9://www.google.com"));
+	   test = "@://www.google.com";
+	   myAssert(test, false, urlVal.isValid(test));
+	   test = "[://www.google.com";
+	   myAssert(test, false, urlVal.isValid(test));
+	   //schemes ending with min and max valid numbers 0,9 should be valid
+	   test = "a0://www.google.com";
+	   myAssert(test, true, urlVal.isValid(test));
+	   test = "a9://www.google.com";
+	   myAssert(test, true, urlVal.isValid(test));
 	   //schemes beginning with min and max valid numbers 0,9 should be invalid
-	   assertFalse("Otherwise valid url beginning with minimum valid number (0) should be invalid", urlVal.isValid("0a://www.google.com"));
-	   assertFalse("Otherwise valid url beginning with maximum valid number (9) should be invalid", urlVal.isValid("9a://www.google.com"));
+	   test = "0a://www.google.com";
+	   myAssert(test, false, urlVal.isValid(test));
+	   test = "9a://www.google.com";
+	   myAssert(test, false, urlVal.isValid(test));
 	   //schemes ending with min and max valid lowercase letters a,z
-	   assertTrue("Otherwise valid url ending with minimum valid lowercase letter (a) should be valid", urlVal.isValid("aa://www.google.com"));
-	   assertTrue("Otherwise valid url ending with maximum valid lowercase letter (z) should be valid", urlVal.isValid("az://www.google.com"));
+	   test = "aa://www.google.com";
+	   myAssert(test, true, urlVal.isValid(test));
+	   test = "az://www.google.com";
+	   myAssert(test, true, urlVal.isValid(test));
 	   //schemes ending with ASCII chars above and below min and max valid lowercase letters a,z
-	   assertFalse("Otherwise valid url ending with maximum invalid ASCII char below lowercase range (`) should be invalid", urlVal.isValid("a`://www.google.com"));
-	   assertFalse("Otherwise valid url ending with minimum invalid ASCII char above lowercase range ({) should be invalid", urlVal.isValid("a{://www.google.com"));
+	   test = "a`://www.google.com";
+	   myAssert(test, false, urlVal.isValid(test));
+	   test = "a{://www.google.com";
+	   myAssert(test, false, urlVal.isValid(test));
 	   //schemes ending with min and max valid uppercase letters A,Z
-	   assertTrue("Otherwise valid url ending with minimum valid uppercase letter (A) should be valid", urlVal.isValid("aA://www.google.com"));
-	   assertTrue("Otherwise valid url ending with maximum valid uppercase letter (Z) should be valid", urlVal.isValid("aZ://www.google.com"));
-	   //schemes ending with ASCII chars above and below min and max valid uppercase letters A,Z
-	   assertFalse("Otherwise valid url ending with maximum invalid ASCII char below uppercase range (@) should be invalid", urlVal.isValid("a@://www.google.com"));
-	   assertFalse("Otherwise valid url ending with minimum invalid ASCII char above uppercase range ([) should be invalid", urlVal.isValid("a[://www.google.com"));
+	   test = "aA://www.google.com";
+	   myAssert(test, true, urlVal.isValid(test));
+	   test = "aZ://www.google.com";
+	   myAssert(test, true, urlVal.isValid(test));
+	   //schemes ending with ASCII chars above and below min and max valid uppercase letters A,Z, should be invalid
+	   test = "a@://www.google.com";
+	   myAssert(test, false, urlVal.isValid(test));
+	   test = "a[://www.google.com";
+	   myAssert(test, false, urlVal.isValid(test));
 	   //schemes ending with . or + or -
-	   assertTrue("Otherwise valid url ending with . should be valid", urlVal.isValid("a.://www.google.com"));
-	   assertTrue("Otherwise valid url ending with + should be valid", urlVal.isValid("a+://www.google.com"));
-	   assertTrue("Otherwise valid url ending with - should be valid", urlVal.isValid("a-://www.google.com"));
+	   test = "a.://www.google.com";
+	   myAssert(test, true, urlVal.isValid(test));
+	   test = "a+://www.google.com";
+	   myAssert(test, true, urlVal.isValid(test));
+	   test = "a-://www.google.com";
+	   myAssert(test, true, urlVal.isValid(test));
    }
    
    //Test authorities in the IPv4 format [0.0.0.0, 255.255.255.255] and reg-name host name format: dot delimited [a,z] [0,9], - https://en.wikipedia.org/wiki/Hostname
-   public void testPathPartitions()
+   public void testAuthorityPartitions()
    {
+	   System.out.println("\nTESTING AUTHORITY PARTITIONS");
 	   UrlValidator urlVal = new UrlValidator(null, null, UrlValidator.ALLOW_ALL_SCHEMES);
 	   //valid IPv4 addresses range [0.0.0.0, 255.255.255.255]
-	   assertTrue("Otherwise valid address with min valid IPv4 host name should be valid", urlVal.isValid("http://0.0.0.0"));
-	   assertTrue("Otherwise valid address with max valid IPv4 host name should be valid", urlVal.isValid("http://255.255.255.255"));
+	   String test = "http://0.0.0.0";
+	   myAssert(test, true, urlVal.isValid(test));
+	   test = "http://255.255.255.255";
+	   myAssert(test, true, urlVal.isValid(test));
 	   //invalid IPv4 addresses range [INT_MIN.INT_MIN.INT_MIN.INT_MIN, 0.0.0.-1]
-	   assertFalse("Otherwise valid address with min negative invalid IPv4 host name should be invalid", 
-			   urlVal.isValid("http://" + (int)Integer.MIN_VALUE + (int)Integer.MIN_VALUE + (int)Integer.MIN_VALUE + (int)Integer.MIN_VALUE));
-	   assertFalse("Otherwise valid address with max negative invalid IPv4 host name should be invalid", urlVal.isValid("http://0.0.0.-1"));
+	   test = "http://" + (int)Integer.MIN_VALUE + (int)Integer.MIN_VALUE + (int)Integer.MIN_VALUE + (int)Integer.MIN_VALUE;
+	   myAssert(test, false, urlVal.isValid(test));
+	   test = "http://0.0.0.-1";
+	   myAssert(test, false, urlVal.isValid(test));
 	   //invalid IPv4 addresses range [255.255.255.256, INT_MAX.INT_MAX.INT_MAX.INT_MAX]
-	   assertFalse("Otherwise valid address with min postive invalid IPv4 host name should be invalid", urlVal.isValid("http://255.255.255.256"));
-	   assertFalse("Otherwise valid address with max positive invalid IPv4 host name should be invalid", 
-			   urlVal.isValid("http://" + (int)Integer.MAX_VALUE + (int)Integer.MAX_VALUE + (int)Integer.MAX_VALUE + (int)Integer.MAX_VALUE));
+	   test = "http://255.255.255.256";
+	   myAssert(test, false, urlVal.isValid(test));
+	   test = "http://" + (int)Integer.MAX_VALUE + (int)Integer.MAX_VALUE + (int)Integer.MAX_VALUE + (int)Integer.MAX_VALUE;
+	   myAssert(test, false, urlVal.isValid(test));
 	   //min and max lowercase letter and number reg-names
-	   assertTrue("Otherwise valid address with valid min lowercase0 (a) reg-name should be valid", urlVal.isValid("http://a"));
-	   assertTrue("Otherwise valid address with valid max lowercase (z) reg-name should be valid", urlVal.isValid("http://z"));
-	   assertTrue("Otherwise valid address with valid min number (0) reg-name should be valid", urlVal.isValid("http://0"));
-	   assertTrue("Otherwise valid address with valid max number (9) reg-name should be valid", urlVal.isValid("http://9"));
+	   test = "http://a";
+	   myAssert(test, true, urlVal.isValid(test));
+	   test = "http://z";
+	   myAssert(test, true, urlVal.isValid(test));
+	   test = "http://0";
+	   myAssert(test, true, urlVal.isValid(test));
+	   test = "http://9";
+	   myAssert(test, true, urlVal.isValid(test));
 	   //min and max reg-name lengths [1,253]
-	   assertTrue("Otherwise valid address with min length (1) reg-name should be valid", urlVal.isValid("http://1"));
-	   String s = "http://";
+	   test = "http://a";
+	   myAssert(test, true, urlVal.isValid(test));
+	   test = "http://";
 	   for(int i = 0; i < 11; i++) {
 		  for(int j = 0; j < 22; j++) {
-			  s += "a";
+			  test += "a";
 		  }
-		  s += ".";
+		  test += ".";
 	   }
-	   assertTrue("Otherwise valid address with max length (253) reg-name should be valid", urlVal.isValid(s));
+	   myAssert(test, true, urlVal.isValid(test));
 	   //invalid length reg-names
-	   assertFalse("Otherwise valid address with min invalid positive length (254) reg-name should be invalid", urlVal.isValid(s + "a"));
-	   assertFalse("Otherwise valid address with 0 length reg-name should be invalid", urlVal.isValid("http://"));
+	   test += "a";
+	   myAssert(test, false, urlVal.isValid(test));
+	   test = "http://";
+	   myAssert(test, false, urlVal.isValid(test));
 	   //test valid and invalid positions for '-'
-	   assertTrue("Otherwise valid address with '-' in between numbers or letters in a label of a reg-name should be valid", urlVal.isValid("http://a.a-3.c"));
-	   assertFalse("Otherwise valid address with '-' beginning a label of a reg-name should be invalid", urlVal.isValid("http://-a"));
-	   assertFalse("Otherwise valid address with '-' ending a label of a reg-name should be invalid", urlVal.isValid("http://a-"));
-
+	   test = "http://a.a-3.c";
+	   myAssert(test, true, urlVal.isValid(test));
+	   test = "http://-a";
+	   myAssert(test, false, urlVal.isValid(test));
+	   test = "http://a-";
+	   myAssert(test, false, urlVal.isValid(test));
    }
    
    //Valid ports in the range 0-65535 - https://en.wikipedia.org/wiki/Port_(computer_networking) tested with three partitions: [INT_MIN, -1], [0,65535], [65536, INT_MAX]
    public void testPortPartitions()
    {
+	   System.out.println("\nTESTING PORT PARTITIONS");
 	   UrlValidator urlVal = new UrlValidator(null, null, UrlValidator.ALLOW_ALL_SCHEMES);
 	   //sample base valid address
-	   assertTrue("Sample base valid address http://www.google.com should be valid.", urlVal.isValid("http://www.google.com"));
+	   String test = "http://www.google.com";
+	   myAssert(test, true, urlVal.isValid(test));
 	   //min and max values in valid range [0, 65535]
-	   assertTrue("Otherwise valid address with a minimum valid port number (0) should be valid", urlVal.isValid("http://www.google.com:0"));
-	   assertTrue("Otherwise valid address with a maximum valid port number (65535) should be valid", urlVal.isValid("http://www.google.com:65535"));
+	   test = "http://www.google.com:0";
+	   myAssert(test, true, urlVal.isValid(test));
+	   test = "http://www.google.com:65535";
+	   myAssert(test, true, urlVal.isValid(test));
 	   //min and max values in negative range [INT_MIN, -1]
-	   assertFalse("Otherwise valid address with a minimum invalid negative port number (INT_MIN) should be invalid",
-		urlVal.isValid("http://www.google.com:" + (int)Integer.MIN_VALUE));
-	   assertFalse("Otherwise valid address with a maximum invalid negative port number (-1) should be invalid", urlVal.isValid("http://www.google.com:-1"));
+	   test = "http://www.google.com:" + (int)Integer.MIN_VALUE;
+	   myAssert(test, false, urlVal.isValid(test));
+	   test = "http://www.google.com:-1";
+	   myAssert(test, false, urlVal.isValid(test));
 	   //min and max values in positive range [65536, INT_MAX]
-	   assertFalse("Otherwise valid address with a minimum invalid positive port number (65536) should be invalid", urlVal.isValid("http://www.google.com:65536"));
-	   assertFalse("Otherwise valid address with a maximum invalid positive port number (INT_MAX) should be invalid", 
-		urlVal.isValid("http://www.google.com:" + (int)Integer.MAX_VALUE));
-
+	   test = "http://www.google.com:65536";
+	   myAssert(test, false, urlVal.isValid(test));
+	   test = "http://www.google.com:" + (int)Integer.MAX_VALUE;
+	   myAssert(test, false, urlVal.isValid(test));
    }
   
  
