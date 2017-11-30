@@ -336,14 +336,14 @@ public class UrlValidatorTest extends TestCase {
 	   test = "http://255.255.255.255";
 	   myAssert(test, true, urlVal.isValid(test));
 	   //invalid IPv4 addresses range [INT_MIN.INT_MIN.INT_MIN.INT_MIN, 0.0.0.-1]
-	   test = "http://" + (int)Integer.MIN_VALUE + (int)Integer.MIN_VALUE + (int)Integer.MIN_VALUE + (int)Integer.MIN_VALUE;
+	   test = "http://" + (int)Integer.MIN_VALUE + "." + (int)Integer.MIN_VALUE + "." + (int)Integer.MIN_VALUE + "." + (int)Integer.MIN_VALUE;
 	   myAssert(test, false, urlVal.isValid(test));
 	   test = "http://0.0.0.-1";
 	   myAssert(test, false, urlVal.isValid(test));
 	   //invalid IPv4 addresses range [255.255.255.256, INT_MAX.INT_MAX.INT_MAX.INT_MAX]
 	   test = "http://255.255.255.256";
 	   myAssert(test, false, urlVal.isValid(test));
-	   test = "http://" + (int)Integer.MAX_VALUE + (int)Integer.MAX_VALUE + (int)Integer.MAX_VALUE + (int)Integer.MAX_VALUE;
+	   test = "http://" + (int)Integer.MAX_VALUE + "." + (int)Integer.MAX_VALUE + "." + (int)Integer.MAX_VALUE + "." + (int)Integer.MAX_VALUE;
 	   myAssert(test, false, urlVal.isValid(test));
 	   //min and max lowercase letter and number reg-names
 	   test = "http://a";
